@@ -392,6 +392,38 @@ test('WkbToWkt - handles multiple geometry types', () => {
   assertContains(result.result, 'LINESTRING');
 });
 
+test('tsvToJson - converts TSV with headers to JSON', () => {
+  const result = executeScript(path.join(scriptsDir, 'tsvToJson.js'), 'Name\tAge\tCity\nAlice\t30\tNYC\nBob\t25\tLA');
+  assertTrue(result.success);
+  assertContains(result.result, 'Alice');
+  assertContains(result.result, 'NYC');
+  // Should be valid JSON array
+  assertTrue(result.result.startsWith('['));
+});
+
+test('tsvToJson - handles single data row', () => {
+  const result = executeScript(path.join(scriptsDir, 'tsvToJson.js'), 'Header1\tHeader2\nValue1\tValue2');
+  assertTrue(result.success);
+  assertContains(result.result, 'Value1');
+  assertContains(result.result, 'Value2');
+});
+
+test('CalculateSize - calculates bytes for short text', () => {
+  const result = executeScript(path.join(scriptsDir, 'CalculateSize.js'), 'Hello');
+  assertTrue(result.success);
+  assertEqual(result.infos.length, 1);
+  assertContains(result.infos[0], 'bytes');
+  assertContains(result.infos[0], '5'); // "Hello" is 5 bytes in UTF-8
+});
+
+test('CalculateSize - handles UTF-8 multibyte characters', () => {
+  const result = executeScript(path.join(scriptsDir, 'CalculateSize.js'), '你好'); // 2 Chinese characters, 3 bytes each = 6 bytes
+  assertTrue(result.success);
+  assertEqual(result.infos.length, 1);
+  assertContains(result.infos[0], 'bytes');
+  assertContains(result.infos[0], '6');
+});
+
 // ----------------------------------------------------------------------------
 // Formatting & Generation Tests
 // ----------------------------------------------------------------------------

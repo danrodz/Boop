@@ -2,7 +2,7 @@
 
 ## JavaScript Test Suite
 
-This repository includes a Node.js-based test runner that validates the 25 community scripts incorporated into Boop's built-in scripts collection.
+This repository includes a Node.js-based test runner that validates the 27 community scripts incorporated into Boop's built-in scripts collection.
 
 ### Running Tests
 
@@ -17,7 +17,7 @@ node test-runner.js
 
 ### Test Coverage
 
-The test suite includes **42 test cases** covering all 25 incorporated scripts:
+The test suite includes **46 test cases** covering all 27 incorporated scripts:
 
 #### Text Manipulation Scripts (9 tests)
 - ✅ JoinLines - joins lines without delimiter
@@ -30,7 +30,7 @@ The test suite includes **42 test cases** covering all 25 incorporated scripts:
 - ✅ LineComparer - checks if all lines are equal
 - ✅ LineComparer - detects different lines
 
-#### Data Conversion Scripts (13 tests)
+#### Data Conversion Scripts (17 tests)
 - ✅ CSVtoJSONheaderless - converts CSV to JSON array
 - ✅ DIGI2ASCII - converts decimal codes to ASCII (space-separated)
 - ✅ DIGI2ASCII - converts decimal codes to ASCII (comma-separated)
@@ -43,6 +43,8 @@ The test suite includes **42 test cases** covering all 25 incorporated scripts:
 - ✅ jsToPhp - converts JS object to PHP array (2 tests)
 - ✅ WktToWkb - converts WKT to WKB hex (2 tests)
 - ✅ WkbToWkt - converts WKB hex to WKT (2 tests)
+- ✅ tsvToJson - converts TSV to JSON (2 tests)
+- ✅ CalculateSize - calculates text size in bytes (2 tests)
 
 #### Formatting & Generation Scripts (10 tests)
 - ✅ ConvertToMarkdownTable - converts CSV to markdown table
@@ -67,16 +69,16 @@ The test suite includes **42 test cases** covering all 25 incorporated scripts:
 
 ### Test Results
 
-**Latest Run:** All 42 tests passing ✅
+**Latest Run:** All 46 tests passing ✅
 
 ```
-Total Tests: 42
-Passed: 42
+Total Tests: 46
+Passed: 46
 Failed: 0
 Success Rate: 100%
 ```
 
-**Coverage:** 25/25 scripts tested (100%)
+**Coverage:** 27/27 scripts tested (100%)
 
 ### Test Implementation
 
@@ -88,7 +90,7 @@ The test suite:
 
 ### Complete Coverage
 
-All 25 community scripts now have automated JavaScript tests covering:
+All 27 community scripts now have automated JavaScript tests covering:
 - Basic functionality for each script
 - Multiple input variations
 - Edge cases and error handling
