@@ -345,6 +345,53 @@ test('rgb2hex - converts RGB to hex', () => {
   // Known bug: padding issue for low values
 });
 
+test('jsToPhp - converts JS object to PHP array', () => {
+  const result = executeScript(path.join(scriptsDir, 'jsToPhp.js'), "{name: 'Alice', age: 25}");
+  // PHP uses [ ] for arrays, not the word "array"
+  assertContains(result.result, "'name' => ");
+  assertContains(result.result, "'age' => ");
+  assertContains(result.result, '// Result:');
+});
+
+test('jsToPhp - converts JS array to PHP array', () => {
+  const result = executeScript(path.join(scriptsDir, 'jsToPhp.js'), "[1, 2, 3]");
+  assertContains(result.result, '[');
+  assertContains(result.result, ']');
+  assertContains(result.result, '// Result:');
+});
+
+test('WktToWkb - converts POINT to WKB hex', () => {
+  const result = executeScript(path.join(scriptsDir, 'WktToWkb.js'), 'POINT(0 0)');
+  assertTrue(result.success);
+  // Should be hex string
+  assertTrue(result.result.length > 20);
+  assertTrue(/^[0-9a-f]+$/i.test(result.result));
+});
+
+test('WktToWkb - converts LINESTRING to WKB hex', () => {
+  const result = executeScript(path.join(scriptsDir, 'WktToWkb.js'), 'LINESTRING(0 0, 1 1)');
+  assertTrue(result.success);
+  assertTrue(result.result.length > 20);
+});
+
+test('WkbToWkt - converts WKB hex to POINT', () => {
+  // WKB for POINT(1.5 2.5) in little-endian format (complete 42-char hex)
+  // Byte order (1 byte) + Type (4 bytes) + X coord (8 bytes) + Y coord (8 bytes)
+  const wkb = '0101000000000000000000f83f0000000000000440';
+  const result = executeScript(path.join(scriptsDir, 'WkbToWkt.js'), wkb);
+  assertTrue(result.success);
+  assertContains(result.result, 'POINT');
+});
+
+test('WkbToWkt - handles multiple geometry types', () => {
+  // Test LINESTRING - WKB type 2 in little-endian with 2 points
+  // Format: 01 (LE) + 02000000 (type 2) + 02000000 (2 points) + coordinates
+  const wkb = '010200000002000000000000000000000000000000000000003ff00000000000003ff0000000000000';
+  const result = executeScript(path.join(scriptsDir, 'WkbToWkt.js'), wkb);
+  assertTrue(result.success);
+  assertContains(result.result, 'LINESTRING');
+});
+
 // ----------------------------------------------------------------------------
 // Formatting & Generation Tests
 // ----------------------------------------------------------------------------
@@ -384,6 +431,36 @@ test('NewBoopScript - generates script template', () => {
   const result = executeScript(path.join(scriptsDir, 'NewBoopScript.js'), '');
   assertContains(result.result, 'function main(state)');
   assertContains(result.result, '"api"');
+});
+
+test('CreateProjectGlossaryMarkdown - shows help text', () => {
+  const result = executeScript(path.join(scriptsDir, 'CreateProjectGlossaryMarkdown.js'), 'help');
+  assertContains(result.result, 'Create Project Glossary');
+  assertContains(result.result, 'projectName');
+  assertContains(result.result, 'includeSamples');
+});
+
+test('CreateProjectGlossaryMarkdown - generates JSON template on empty input', () => {
+  const result = executeScript(path.join(scriptsDir, 'CreateProjectGlossaryMarkdown.js'), '');
+  assertContains(result.result, 'projectName');
+  assertContains(result.result, 'includeSamples');
+  assertContains(result.result, 'Project Name');
+});
+
+test('CreateProjectGlossaryMarkdown - generates glossary from JSON', () => {
+  const input = '{"projectName": "My Project", "includeSamples": false}';
+  const result = executeScript(path.join(scriptsDir, 'CreateProjectGlossaryMarkdown.js'), input);
+  assertContains(result.result, '# My Project');
+  assertContains(result.result, '## Glossary Of Terms');
+  assertContains(result.result, '[A](#a)');
+  assertContains(result.result, '[Z](#z)');
+});
+
+test('CreateProjectGlossaryMarkdown - includes samples when requested', () => {
+  const input = '{"projectName": "Test", "includeSamples": true}';
+  const result = executeScript(path.join(scriptsDir, 'CreateProjectGlossaryMarkdown.js'), input);
+  assertContains(result.result, 'Example Entry');
+  assertContains(result.result, '# Test');
 });
 
 // ----------------------------------------------------------------------------

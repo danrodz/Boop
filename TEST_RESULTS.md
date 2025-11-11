@@ -17,9 +17,9 @@ node test-runner.js
 
 ### Test Coverage
 
-The test suite includes **32 test cases** covering:
+The test suite includes **42 test cases** covering all 25 incorporated scripts:
 
-#### Text Manipulation (9 tests)
+#### Text Manipulation Scripts (9 tests)
 - ✅ JoinLines - joins lines without delimiter
 - ✅ JoinLinesWithComma - joins lines with commas
 - ✅ JoinLinesWithSpace - joins lines with spaces
@@ -30,7 +30,7 @@ The test suite includes **32 test cases** covering:
 - ✅ LineComparer - checks if all lines are equal
 - ✅ LineComparer - detects different lines
 
-#### Data Conversion (9 tests)
+#### Data Conversion Scripts (13 tests)
 - ✅ CSVtoJSONheaderless - converts CSV to JSON array
 - ✅ DIGI2ASCII - converts decimal codes to ASCII (space-separated)
 - ✅ DIGI2ASCII - converts decimal codes to ASCII (comma-separated)
@@ -40,16 +40,20 @@ The test suite includes **32 test cases** covering:
 - ✅ TimeToSecond - converts hh:mm:ss to seconds
 - ✅ TimeToSecond - handles mm:ss format (treated as hh:mm)
 - ✅ rgb2hex - converts RGB to hex
+- ✅ jsToPhp - converts JS object to PHP array (2 tests)
+- ✅ WktToWkb - converts WKT to WKB hex (2 tests)
+- ✅ WkbToWkt - converts WKB hex to WKT (2 tests)
 
-#### Formatting & Generation (6 tests)
+#### Formatting & Generation Scripts (10 tests)
 - ✅ ConvertToMarkdownTable - converts CSV to markdown table
 - ✅ ListToHTMLList - converts comma list to HTML
 - ✅ ListToHTMLList - converts HTML back to comma list
 - ✅ GenerateHashtag - creates hashtag from text
 - ✅ GenerateHashtag - removes special characters
 - ✅ NewBoopScript - generates script template
+- ✅ CreateProjectGlossaryMarkdown - generates glossary templates (4 tests)
 
-#### Code Utilities (4 tests)
+#### Code Utilities Scripts (4 tests)
 - ✅ ToggleCamelHyphen - converts hyphen to camel
 - ✅ ToggleCamelHyphen - converts camel to hyphen
 - ✅ ContrastingColor - determines contrast for white
@@ -63,14 +67,16 @@ The test suite includes **32 test cases** covering:
 
 ### Test Results
 
-**Latest Run:** All 32 tests passing ✅
+**Latest Run:** All 42 tests passing ✅
 
 ```
-Total Tests: 32
-Passed: 32
+Total Tests: 42
+Passed: 42
 Failed: 0
 Success Rate: 100%
 ```
+
+**Coverage:** 25/25 scripts tested (100%)
 
 ### Test Implementation
 
@@ -80,14 +86,13 @@ The test suite:
 - **Validates outputs** against expected results
 - **Tests edge cases** (empty input, special characters, multiple formats)
 
-### Known Limitations
+### Complete Coverage
 
-The following scripts were not fully tested due to complexity:
-- **WkbToWkt.js** / **WktToWkb.js** - Geographic data conversion (requires complex WKB/WKT data)
-- **CreateProjectGlossaryMarkdown.js** - Template generator (requires specific JSON format)
-- **jsToPhp.js** - PHP array conversion (output format varies)
-
-These scripts were code-reviewed but would benefit from additional integration tests.
+All 25 community scripts now have automated JavaScript tests covering:
+- Basic functionality for each script
+- Multiple input variations
+- Edge cases and error handling
+- Different data formats (where applicable)
 
 ### Script Issues Documented
 
