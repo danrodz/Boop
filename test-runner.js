@@ -548,7 +548,395 @@ test('GenerateHashtag - handles empty input gracefully', () => {
   assertTrue(result.errors.length > 0 || result.result === '#');
 });
 
+
+// ----------------------------------------------------------------------------
+// Line Deduplication Tests
+// ----------------------------------------------------------------------------
+
+console.log(`\n${colors.bright}Line Deduplication Scripts${colors.reset}`);
+
+test('LineDedupKeepFirst - removes duplicates keeping first occurrence', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'apple\nbanana\napple\ncherry\nbanana');
+  assertEqual(result.result, 'apple\nbanana\ncherry');
+  assertTrue(result.infos.length > 0);
+  assertContains(result.infos[0], '2 duplicate lines');
+});
+
+test('LineDedupKeepFirst - preserves order of first occurrences', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'third\nfirst\nsecond\nfirst\nthird');
+  assertEqual(result.result, 'third\nfirst\nsecond');
+});
+
+test('LineDedupKeepFirst - handles empty lines', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'line1\n\nline2\n\nline3');
+  assertEqual(result.result, 'line1\n\nline2\nline3');
+});
+
+test('LineDedupKeepFirst - handles multiple duplicates of same line', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'test\ntest\ntest\ntest');
+  assertEqual(result.result, 'test');
+  assertContains(result.infos[0], '3 duplicate lines');
+});
+
+test('LineDedupKeepFirst - handles no duplicates', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'unique1\nunique2\nunique3');
+  assertEqual(result.result, 'unique1\nunique2\nunique3');
+  assertContains(result.infos[0], 'No duplicate lines');
+});
+
+test('LineDedupKeepFirst - handles single line', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepFirst.js'), 'single');
+  assertEqual(result.result, 'single');
+  assertContains(result.infos[0], 'No duplicate lines');
+});
+
+test('LineDedupKeepLast - removes duplicates keeping last occurrence', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'apple\nbanana\napple\ncherry\nbanana');
+  assertEqual(result.result, 'apple\ncherry\nbanana');
+  assertTrue(result.infos.length > 0);
+  assertContains(result.infos[0], '2 duplicate lines');
+});
+
+test('LineDedupKeepLast - preserves order of last occurrences', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'first\nsecond\nthird\nfirst\nsecond');
+  assertEqual(result.result, 'third\nfirst\nsecond');
+});
+
+test('LineDedupKeepLast - handles empty lines', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'line1\n\nline2\n\nline3');
+  assertEqual(result.result, 'line1\nline2\n\nline3');
+});
+
+test('LineDedupKeepLast - handles multiple duplicates of same line', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'test\ntest\ntest\ntest');
+  assertEqual(result.result, 'test');
+  assertContains(result.infos[0], '3 duplicate lines');
+});
+
+test('LineDedupKeepLast - handles no duplicates', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'unique1\nunique2\nunique3');
+  assertEqual(result.result, 'unique1\nunique2\nunique3');
+  assertContains(result.infos[0], 'No duplicate lines');
+});
+
+test('LineDedupKeepLast - handles single line', () => {
+  const result = executeScript(path.join(scriptsDir, 'LineDedupKeepLast.js'), 'single');
+  assertEqual(result.result, 'single');
+  assertContains(result.infos[0], 'No duplicate lines');
+});
+
+// ----------------------------------------------------------------------------
+// Quote Conversion Tests
+// ----------------------------------------------------------------------------
+
+console.log(`\n${colors.bright}Quote Conversion Scripts${colors.reset}`);
+
+test('SmartQuotesToStraight - converts smart double quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'SmartQuotesToStraight.js'), '\u201CHello World\u201D');
+  assertEqual(result.result, '"Hello World"');
+  assertContains(result.infos[0], 'Converted');
+});
+
+test('SmartQuotesToStraight - converts smart single quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'SmartQuotesToStraight.js'), '\u2018Hello World\u2019');
+  assertEqual(result.result, "'Hello World'");
+  assertContains(result.infos[0], 'Converted');
+});
+
+test('SmartQuotesToStraight - converts mixed quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'SmartQuotesToStraight.js'), '\u201CHe said \u2018hello\u2019\u201D');
+  assertEqual(result.result, '"He said \'hello\'"');
+});
+
+test('SmartQuotesToStraight - handles text without smart quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'SmartQuotesToStraight.js'), 'No smart quotes here');
+  assertEqual(result.result, 'No smart quotes here');
+  assertContains(result.infos[0], 'No smart quotes found');
+});
+
+test('SmartQuotesToStraight - handles multiple smart quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'SmartQuotesToStraight.js'), '\u201CFirst\u201D and \u201CSecond\u201D');
+  assertEqual(result.result, '"First" and "Second"');
+});
+
+test('StraightQuotesToSmart - converts straight double quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), '"Hello World"');
+  assertTrue(result.result.includes('\u201C'));
+  assertTrue(result.result.includes('\u201D'));
+  assertContains(result.infos[0], 'Converted');
+});
+
+test('StraightQuotesToSmart - converts straight single quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), "'Hello World'");
+  assertTrue(result.result.includes('\u2018') || result.result.includes('\u2019'));
+  assertContains(result.infos[0], 'Converted');
+});
+
+test('StraightQuotesToSmart - handles contractions', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), "don't can't won't");
+  assertTrue(result.result.includes('\u2019')); // Should use right single quote for apostrophes
+  assertContains(result.result, 'don\u2019t');
+});
+
+test('StraightQuotesToSmart - converts nested quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), '"He said \'hello\'"');
+  assertTrue(result.result.includes('\u201C'));
+  assertTrue(result.result.includes('\u2018') || result.result.includes('\u2019'));
+});
+
+test('StraightQuotesToSmart - handles text without quotes', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), 'No quotes here');
+  assertEqual(result.result, 'No quotes here');
+  assertContains(result.infos[0], 'No straight quotes found');
+});
+
+test('StraightQuotesToSmart - handles multiple quoted phrases', () => {
+  const result = executeScript(path.join(scriptsDir, 'StraightQuotesToSmart.js'), '"First" and "Second"');
+  const matches = (result.result.match(/\u201C/g) || []).length;
+  assertEqual(matches, 2); // Two opening quotes
+});
+
+// ----------------------------------------------------------------------------
+// Text Statistics Tests
+// ----------------------------------------------------------------------------
+
+console.log(`\n${colors.bright}Text Statistics Script${colors.reset}`);
+
+test('TextStatistics - calculates basic statistics', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Hello world');
+  assertTrue(result.infos.length > 0);
+  assertContains(result.infos[0], 'Characters: 11');
+  assertContains(result.infos[0], 'Words: 2');
+  assertEqual(result.result, 'Hello world'); // Text unchanged
+});
+
+test('TextStatistics - counts characters with and without spaces', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Hello world');
+  assertContains(result.infos[0], '11');
+  assertContains(result.infos[0], '10 without spaces');
+});
+
+test('TextStatistics - counts lines correctly', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Line 1\nLine 2\nLine 3');
+  assertContains(result.infos[0], 'Lines: 3');
+});
+
+test('TextStatistics - counts non-empty lines', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Line 1\n\nLine 2\n\nLine 3');
+  assertContains(result.infos[0], '3 non-empty');
+});
+
+test('TextStatistics - counts sentences', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'First sentence. Second sentence! Third sentence?');
+  assertContains(result.infos[0], 'Sentences: 3');
+});
+
+test('TextStatistics - counts paragraphs', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Para 1\nLine 2\n\nPara 2\nLine 2');
+  assertContains(result.infos[0], 'Paragraphs: 2');
+});
+
+test('TextStatistics - calculates average word length', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'I am testing');
+  assertContains(result.infos[0], 'Average word length:');
+});
+
+test('TextStatistics - calculates reading time', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'word '.repeat(100));
+  assertContains(result.infos[0], 'reading time:');
+});
+
+test('TextStatistics - shows reading time in seconds for short text', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'Short text here');
+  assertContains(result.infos[0], 'sec');
+});
+
+test('TextStatistics - shows reading time in minutes for long text', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), 'word '.repeat(300));
+  assertContains(result.infos[0], 'min');
+});
+
+test('TextStatistics - handles empty text', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), '');
+  assertTrue(result.errors.length > 0);
+  assertContains(result.errors[0], 'Empty');
+});
+
+test('TextStatistics - handles whitespace-only text', () => {
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), '   \n   \n   ');
+  assertTrue(result.errors.length > 0);
+  assertContains(result.errors[0], 'Empty');
+});
+
+test('TextStatistics - preserves original text', () => {
+  const input = 'This is a test. Do not change this text!';
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), input);
+  assertEqual(result.result, input);
+});
+
+test('TextStatistics - handles complex text', () => {
+  const complexText = 'This is the first paragraph.\nIt has multiple sentences!\n\nThis is the second paragraph?\nIt also has sentences.';
+  const result = executeScript(path.join(scriptsDir, 'TextStatistics.js'), complexText);
+  assertTrue(result.infos.length > 0);
+  assertContains(result.infos[0], 'Characters:');
+  assertContains(result.infos[0], 'Words:');
+  assertContains(result.infos[0], 'Lines:');
+  assertContains(result.infos[0], 'Sentences:');
+  assertContains(result.infos[0], 'Paragraphs: 2');
+});
+
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Cryptographic & Hash Functions Tests
+// ----------------------------------------------------------------------------
+
+console.log(`\n${colors.bright}Cryptographic & Hash Functions Scripts${colors.reset}`);
+
+test('CRC32 - calculates checksum for "Hello World"', () => {
+  const result = executeScript(path.join(scriptsDir, 'CRC32.js'), 'Hello World');
+  // CRC32 of "Hello World" is 0x4A17B156
+  assertEqual(result.result, '4A17B156');
+});
+
+test('CRC32 - calculates checksum for empty string', () => {
+  const result = executeScript(path.join(scriptsDir, 'CRC32.js'), '');
+  // CRC32 of empty string is 0x00000000
+  assertEqual(result.result, '00000000');
+});
+
+test('CRC32 - calculates checksum for "123456789"', () => {
+  const result = executeScript(path.join(scriptsDir, 'CRC32.js'), '123456789');
+  // Standard CRC32 test vector: CRC32("123456789") = 0xCBF43926
+  assertEqual(result.result, 'CBF43926');
+});
+
+test('CRC32 - handles special characters', () => {
+  const result = executeScript(path.join(scriptsDir, 'CRC32.js'), 'The quick brown fox jumps over the lazy dog');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 8); // Should be 8 hex chars
+});
+
+test('JWTEncode - creates valid JWT with default secret', () => {
+  const result = executeScript(path.join(scriptsDir, 'JWTEncode.js'), '{"sub":"1234567890","name":"John Doe"}');
+  assertTrue(result.success);
+  // JWT should have 3 parts separated by dots
+  const parts = result.result.split('.');
+  assertEqual(parts.length, 3);
+  // Check that parts are non-empty
+  assertTrue(parts[0].length > 0);
+  assertTrue(parts[1].length > 0);
+  assertTrue(parts[2].length > 0);
+});
+
+test('JWTEncode - creates JWT with custom secret', () => {
+  const result = executeScript(path.join(scriptsDir, 'JWTEncode.js'), 'my-secret|{"sub":"test","name":"Alice"}');
+  assertTrue(result.success);
+  const parts = result.result.split('.');
+  assertEqual(parts.length, 3);
+});
+
+test('JWTEncode - handles empty payload object', () => {
+  const result = executeScript(path.join(scriptsDir, 'JWTEncode.js'), '{}');
+  assertTrue(result.success);
+  const parts = result.result.split('.');
+  assertEqual(parts.length, 3);
+});
+
+test('JWTEncode - rejects invalid JSON', () => {
+  const result = executeScript(path.join(scriptsDir, 'JWTEncode.js'), 'not valid json');
+  assertTrue(result.errors.length > 0);
+});
+
+test('JWTEncode - handles complex payload', () => {
+  const payload = '{"sub":"1234","name":"Test User","admin":true,"iat":1516239022}';
+  const result = executeScript(path.join(scriptsDir, 'JWTEncode.js'), payload);
+  assertTrue(result.success);
+  const parts = result.result.split('.');
+  assertEqual(parts.length, 3);
+});
+
+test('HMACSHA256 - generates HMAC with default key', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'Hello World');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 64); // SHA256 produces 64 hex chars
+  assertTrue(/^[0-9A-F]+$/.test(result.result)); // Should be uppercase hex
+});
+
+test('HMACSHA256 - generates HMAC with custom key', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'secret|message');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 64);
+});
+
+test('HMACSHA256 - test vector from RFC 4231', () => {
+  // Test case 2 from RFC 4231
+  const key = 'Jefe';
+  const message = 'what do ya want for nothing?';
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), key + '|' + message);
+  // Expected: 5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843
+  assertEqual(result.result, '5BDCC146BF60754E6A042426089575C75A003F089D2739839DEC58B964EC3843');
+});
+
+test('HMACSHA256 - handles empty message', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'key|');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 64);
+});
+
+test('HMACSHA256 - handles message with pipe character', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'key|message|with|pipes');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 64);
+});
+
+test('HMACSHA256 - different keys produce different results', () => {
+  const result1 = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'key1|same message');
+  const result2 = executeScript(path.join(scriptsDir, 'HMACSHA256.js'), 'key2|same message');
+  assertTrue(result1.result !== result2.result);
+});
+
+test('HMACSHA512 - generates HMAC with default key', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'Hello World');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 128); // SHA512 produces 128 hex chars
+  assertTrue(/^[0-9A-F]+$/.test(result.result)); // Should be uppercase hex
+});
+
+test('HMACSHA512 - generates HMAC with custom key', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'secret|message');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 128);
+});
+
+
+
+test('HMACSHA512 - handles empty message', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'key|');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 128);
+});
+
+test('HMACSHA512 - handles long message', () => {
+  const longMessage = 'a'.repeat(1000);
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'key|' + longMessage);
+  assertTrue(result.success);
+  assertEqual(result.result.length, 128);
+});
+
+test('HMACSHA512 - different keys produce different results', () => {
+  const result1 = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'key1|same message');
+  const result2 = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'key2|same message');
+  assertTrue(result1.result !== result2.result);
+});
+
+test('HMACSHA512 - handles UTF-8 characters', () => {
+  const result = executeScript(path.join(scriptsDir, 'HMACSHA512.js'), 'key|Hello 世界');
+  assertTrue(result.success);
+  assertEqual(result.result.length, 128);
+});
+
+
 // TEST RESULTS SUMMARY
 // ============================================================================
 
