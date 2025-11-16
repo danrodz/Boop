@@ -14,20 +14,91 @@ class MainViewController: NSViewController {
     @IBOutlet weak var editorView: SyntaxTextView!
     @IBOutlet weak var updateBuddy: UpdateBuddy!
     @IBOutlet weak var checkUpdateMenuItem: NSMenuItem!
-    
+
+    // Multi-cursor support
+    private var multiCursorManager: MultiCursorManager?
+    private var multiCursorOverlay: MultiCursorOverlayView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         #if APPSTORE
-        
+
         checkUpdateMenuItem.isHidden = true
-        
+
         #endif
-        
+
         editorView.delegate = self
-        
+
         editorView.contentTextView.selectedTextAttributes = [.backgroundColor:NSColor(red:0.19, green:0.44, blue:0.71, alpha:1.0), .foregroundColor: NSColor.white]
-        
+
+        setupMultiCursorSupport()
+
+    }
+
+    // MARK: - Multi-Cursor Setup
+
+    private func setupMultiCursorSupport() {
+        let textView = editorView.contentTextView
+        multiCursorManager = MultiCursorManager(textView: textView)
+
+        // Create overlay view for multi-cursor rendering
+        multiCursorOverlay = MultiCursorOverlayView(frame: editorView.bounds)
+        multiCursorOverlay?.textView = textView
+        multiCursorOverlay?.autoresizingMask = [.width, .height]
+
+        if let overlay = multiCursorOverlay {
+            editorView.addSubview(overlay)
+        }
+
+        // Add click gesture recognizer for Cmd+Click
+        let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleClick(_:)))
+        editorView.addGestureRecognizer(clickGesture)
+    }
+
+    // MARK: - Multi-Cursor Actions
+
+    @objc private func handleClick(_ gesture: NSClickGestureRecognizer) {
+        guard let event = NSApp.currentEvent,
+              event.modifierFlags.contains(.command) else { return }
+
+        let point = gesture.location(in: editorView)
+        let textView = editorView.contentTextView
+
+        // Convert point to text position
+        var convertedPoint = editorView.convert(point, to: textView)
+        convertedPoint.x -= textView.textContainerOrigin.x
+        convertedPoint.y -= textView.textContainerOrigin.y
+
+        guard let layoutManager = textView.layoutManager,
+              let textContainer = textView.textContainer else { return }
+
+        let characterIndex = layoutManager.characterIndex(for: convertedPoint,
+                                                          in: textContainer,
+                                                          fractionOfDistanceBetweenInsertionPoints: nil)
+
+        multiCursorManager?.addCursor(at: characterIndex)
+        updateMultiCursorOverlay()
+    }
+
+    @IBAction func addCursorAtNextOccurrence(_ sender: Any) {
+        multiCursorManager?.addCursorAtNextOccurrence()
+        updateMultiCursorOverlay()
+    }
+
+    @IBAction func addCursorsAtAllOccurrences(_ sender: Any) {
+        multiCursorManager?.addCursorsAtAllOccurrences()
+        updateMultiCursorOverlay()
+    }
+
+    @IBAction func clearAllCursors(_ sender: Any) {
+        multiCursorManager?.clearAllCursors()
+        updateMultiCursorOverlay()
+    }
+
+    private func updateMultiCursorOverlay() {
+        guard let manager = multiCursorManager else { return }
+        multiCursorOverlay?.cursorPositions = manager.isMultiCursorActive ? manager.getCursorRanges().map { $0.location } : []
     }
     @IBAction func openHelp(_ sender: Any) {
         open(url: "https://boop.okat.best/docs/")
@@ -67,27 +138,56 @@ class MainViewController: NSViewController {
     @IBAction func checkForUpdates(_ sender: Any) {
         updateBuddy.check()
     }
+
+    // MARK: - Keyboard Shortcuts
+
+    override func keyDown(with event: NSEvent) {
+        // Handle keyboard shortcuts for multi-cursor operations
+        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+
+        // Cmd+D: Add cursor at next occurrence
+        if event.charactersIgnoringModifiers == "d" && flags.contains(.command) && !flags.contains(.shift) {
+            addCursorAtNextOccurrence(self)
+            return
+        }
+
+        // Cmd+Shift+L: Add cursors at all occurrences
+        if event.charactersIgnoringModifiers == "l" && flags.contains([.command, .shift]) {
+            addCursorsAtAllOccurrences(self)
+            return
+        }
+
+        // Escape: Clear all cursors
+        if event.keyCode == 53 { // Escape key
+            clearAllCursors(self)
+            return
+        }
+
+        super.keyDown(with: event)
+    }
 }
 
 extension MainViewController: SyntaxTextViewDelegate {
     func theme(for appearance: NSAppearance) -> SyntaxColorTheme {
         return DefaultTheme(appearance: appearance)
     }
+
     func didChangeText(_ syntaxTextView: SyntaxTextView) {
-        
+        updateMultiCursorOverlay()
     }
-    
+
     func didChangeSelectedRange(_ syntaxTextView: SyntaxTextView, selectedRange: NSRange) {
-        
+        // Update overlay when selection changes
+        updateMultiCursorOverlay()
     }
-    
+
     func didChangeFont(_ font: Font) {
         //
     }
-    
+
     func lexerForSource(_ source: String) -> Lexer {
         return BoopLexer()
     }
-    
-    
+
+
 }
