@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"JWT Encode",
 		"description":"Creates a JWT token (HS256) from JSON payload. Use default secret or provide as 'secret|payload'",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"identification",
 		"tags":"jwt,encode,token,hs256"
 	}

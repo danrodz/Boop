@@ -3,7 +3,7 @@
 	"api":1,
 	"name":"Morse Encode",
 	"description":"Converts text to Morse code (. and -, letters separated by space, words by /)",
-	"author":"Claude",
+	"author":"danrodz",
 	"icon":"wand",
 	"tags":"morse,encode,telegraph"
 }

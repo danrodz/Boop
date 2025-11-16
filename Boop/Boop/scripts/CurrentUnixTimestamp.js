@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Current Unix Timestamp",
 		"description":"Outputs the current Unix timestamp in seconds.",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"clock",
 		"tags":"timestamp,unix,time,epoch,seconds"
 	}

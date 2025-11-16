@@ -3,7 +3,7 @@
     "api":1,
     "name":"Unflatten JSON",
     "description":"Unflatten dot notation to nested JSON",
-    "author":"Boop",
+    "author":"danrodz",
     "icon":"outdent",
     "tags":"json,unflatten,dot notation"
   }

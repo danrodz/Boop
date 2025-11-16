@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Punycode Decode",
 		"description":"Decodes punycode domain names to internationalized format (xn--caf-dma.com → café.com)",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"link",
 		"tags":"punycode,idn,domain,decode,international"
 	}

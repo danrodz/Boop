@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Punycode Encode",
 		"description":"Encodes internationalized domain names to ASCII (café.com → xn--caf-dma.com)",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"link",
 		"tags":"punycode,idn,domain,encode,international"
 	}

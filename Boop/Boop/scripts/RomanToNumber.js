@@ -3,7 +3,7 @@
    "api": 1,
    "name": "Roman to Number",
    "description": "Converts Roman numerals to decimal numbers.",
-   "author": "Boop",
+   "author":"danrodz",
    "icon": "metamorphose",
    "tags": "roman,numeral,decimal,convert"
  }

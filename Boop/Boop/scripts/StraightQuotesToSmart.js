@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Straight Quotes to Smart",
   "description": "Converts straight quotes to smart/curly quotes.",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "quotes",
   "tags": "smart,quotes,curly,straight,convert"
 }

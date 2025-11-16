@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"HMAC-SHA256",
 		"description":"Generates HMAC-SHA256 (hex). Input format: 'key|message' or use default key",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"fingerprint",
 		"tags":"hmac,sha256,hash,authentication"
 	}

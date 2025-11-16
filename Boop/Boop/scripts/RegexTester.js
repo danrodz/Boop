@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Regex Tester",
 		"description":"Test regex patterns against text (format: 'pattern|text' or multiline with pattern on first line)",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"beaker",
 		"tags":"regex,test,pattern,match"
 	}

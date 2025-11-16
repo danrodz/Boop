@@ -3,7 +3,7 @@
     "api":1,
     "name":"Sort JSON Keys Deep",
     "description":"Alphabetically sort all keys recursively in JSON",
-    "author":"Boop",
+    "author":"danrodz",
     "icon":"sort-characters",
     "tags":"json,sort,keys,deep,recursive"
   }

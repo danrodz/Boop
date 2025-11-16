@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Extract Emails",
 		"description":"Extracts all email addresses from text and lists them one per line.",
-		"author":"Claude",
+		"author":"danrodz",
 		"icon":"envelope",
 		"tags":"email,extract,parse,contact"
 	}

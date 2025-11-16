@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Extract URLs",
 		"description":"Extracts all URLs from text and lists them one per line.",
-		"author":"Claude",
+		"author":"danrodz",
 		"icon":"link",
 		"tags":"url,extract,links,parse"
 	}

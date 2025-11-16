@@ -3,7 +3,7 @@
    "api": 1,
    "name": "Binary Calculator",
    "description": "Performs arithmetic operations on binary numbers (+, -, *, /).",
-   "author": "Boop",
+   "author":"danrodz",
    "icon": "calculator",
    "tags": "binary,calculator,math,arithmetic"
  }

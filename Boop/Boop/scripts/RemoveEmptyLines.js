@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Remove Empty Lines",
   "description": "Removes all empty lines and lines containing only whitespace",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "filtration",
   "tags": "empty,lines,whitespace,clean,filter"
 }

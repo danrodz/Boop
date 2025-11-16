@@ -3,7 +3,7 @@
 	"api":1,
 	"name":"Zalgo Text",
 	"description":"Generates corrupted zalgo text with combining diacritical marks",
-	"author":"Claude",
+	"author":"danrodz",
 	"icon":"wand",
 	"tags":"zalgo,glitch,corruption,unicode,combining"
 }

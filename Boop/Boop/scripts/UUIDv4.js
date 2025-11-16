@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Generate UUID v4",
 		"description":"Generates a random UUID v4 (Universally Unique Identifier).",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"key",
 		"tags":"uuid,generate,random,guid,identifier"
 	}

@@ -3,7 +3,7 @@
 	"api":1,
 	"name":"Shortcode to Emoji",
 	"description":"Converts shortcodes to emoji (:smile: → 😀)",
-	"author":"Claude",
+	"author":"danrodz",
 	"icon":"bolt",
 	"tags":"emoji,shortcode,decode"
 }

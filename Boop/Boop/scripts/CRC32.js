@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"CRC32 Checksum",
 		"description":"Calculates the CRC32 checksum of your text (hex encoded)",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"fingerprint",
 		"tags":"crc32,checksum,hash"
 	}

@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Generate UUID v5",
 		"description":"Generates a namespace-based UUID v5. Input is used as the name. For custom namespace, use format: 'namespace|name'.",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"key",
 		"tags":"uuid,generate,hash,guid,identifier,namespace"
 	}

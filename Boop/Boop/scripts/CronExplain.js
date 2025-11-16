@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Cron Explain",
 		"description":"Explains cron expressions in plain English",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"clock",
 		"tags":"cron,explain,time,schedule"
 	}

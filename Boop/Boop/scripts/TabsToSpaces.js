@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Tabs to Spaces",
 		"description":"Converts tabs to spaces (default 4 spaces per tab).",
-		"author":"Claude",
+		"author":"danrodz",
 		"icon":"arrow-right",
 		"tags":"tabs,spaces,indent,convert,formatting"
 	}

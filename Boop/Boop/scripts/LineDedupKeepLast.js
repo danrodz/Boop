@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Remove Duplicate Lines (Keep Last)",
   "description": "Removes duplicate lines, keeping the last occurrence of each line.",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "filtration",
   "tags": "unique,duplicate,dedup,lines,last"
 }

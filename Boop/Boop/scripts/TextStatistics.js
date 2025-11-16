@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Text Statistics",
   "description": "Calculates detailed text statistics including characters, words, lines, sentences, and reading time.",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "counter",
   "tags": "statistics,stats,count,words,characters,lines,sentences,reading"
 }

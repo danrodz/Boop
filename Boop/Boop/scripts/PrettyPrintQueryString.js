@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Pretty Print Query String",
 		"description":"Formats URL query strings into readable format",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"link",
 		"tags":"url,query,format,pretty,decode"
 	}

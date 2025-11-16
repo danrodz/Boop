@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Quoted-Printable Decode",
 		"description":"Decodes Quoted-Printable format (RFC 2045) used in email",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"metamorphose",
 		"tags":"quoted-printable,email,mime,decode"
 	}

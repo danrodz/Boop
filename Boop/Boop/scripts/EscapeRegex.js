@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Escape Regex",
 		"description":"Escapes special regex characters for literal matching",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"shield",
 		"tags":"regex,escape,literal,special characters"
 	}

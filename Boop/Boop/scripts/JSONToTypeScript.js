@@ -3,7 +3,7 @@
     "api":1,
     "name":"JSON to TypeScript",
     "description":"Generate TypeScript interface from JSON",
-    "author":"Boop",
+    "author":"danrodz",
     "icon":"code",
     "tags":"json,typescript,interface,type"
   }

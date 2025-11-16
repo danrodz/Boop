@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Word Wrap",
   "description": "Wraps text at specified column width (default 80). Put width as first line to customize.",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "align",
   "tags": "wrap,width,column,format,line"
 }

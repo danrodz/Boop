@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Base32 Decode",
 		"description":"Decodes your text from Base32 (RFC 4648)",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"metamorphose",
 		"tags":"base32,decode"
 	}

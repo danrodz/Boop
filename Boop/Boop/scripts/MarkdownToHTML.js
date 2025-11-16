@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Markdown to HTML",
   "description": "Convert Markdown to HTML with support for headers, bold, italic, links, code blocks, and lists",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "code",
   "tags": "markdown,html,convert"
 }

@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Strip Markdown",
   "description": "Remove all Markdown formatting and keep only plain text content",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "text",
   "tags": "markdown,strip,plain text,remove formatting"
 }

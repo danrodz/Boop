@@ -3,7 +3,7 @@
     "api":1,
     "name":"Flatten JSON",
     "description":"Flatten nested JSON to dot notation",
-    "author":"Boop",
+    "author":"danrodz",
     "icon":"indent",
     "tags":"json,flatten,dot notation"
   }

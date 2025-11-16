@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Minify JavaScript",
 		"description":"Minifies JavaScript code by removing comments and excess whitespace.",
-		"author":"Claude",
+		"author":"danrodz",
 		"icon":"broom",
 		"tags":"javascript,minify,clean,compress",
 		"bias": -0.1

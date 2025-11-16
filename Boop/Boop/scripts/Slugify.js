@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Slugify",
   "description": "Converts text to URL-friendly slug format",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "link",
   "tags": "slug,url,kebab,lowercase,hyphen"
 }

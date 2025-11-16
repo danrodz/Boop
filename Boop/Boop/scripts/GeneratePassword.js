@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Generate Password",
 		"description":"Generates a random secure password. Specify length (e.g., '16') or leave empty for default (16 characters).",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"lock",
 		"tags":"password,generate,random,security,secure"
 	}

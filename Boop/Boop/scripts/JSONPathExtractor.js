@@ -3,7 +3,7 @@
     "api":1,
     "name":"JSON Path Extractor",
     "description":"Extract value from JSON using dot notation path (e.g., users.0.name)",
-    "author":"Boop",
+    "author":"danrodz",
     "icon":"search",
     "tags":"json,path,extract,query"
   }

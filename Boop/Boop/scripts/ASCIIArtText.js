@@ -3,7 +3,7 @@
 	"api":1,
 	"name":"ASCII Art Text",
 	"description":"Converts text to ASCII art banner (block letters)",
-	"author":"Claude",
+	"author":"danrodz",
 	"icon":"type",
 	"tags":"ascii,art,banner,block,letters"
 }

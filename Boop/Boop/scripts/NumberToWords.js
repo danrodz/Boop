@@ -3,7 +3,7 @@
    "api": 1,
    "name": "Number to Words",
    "description": "Converts numbers to English words (0-999,999).",
-   "author": "Boop",
+   "author":"danrodz",
    "icon": "metamorphose",
    "tags": "number,words,english,convert"
  }

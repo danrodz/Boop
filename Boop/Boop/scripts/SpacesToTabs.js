@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Spaces to Tabs",
 		"description":"Converts leading spaces to tabs (auto-detects indent size: 2, 4, or 8 spaces).",
-		"author":"Claude",
+		"author":"danrodz",
 		"icon":"arrow-left",
 		"tags":"tabs,spaces,indent,convert,formatting"
 	}

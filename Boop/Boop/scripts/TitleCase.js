@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Title Case",
   "description": "Converts text to title case with proper handling of articles and prepositions",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "capital",
   "tags": "title,case,capitalize,proper"
 }

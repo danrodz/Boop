@@ -3,7 +3,7 @@
 		"api":1,
 		"name":"Current Unix Timestamp (Milliseconds)",
 		"description":"Outputs the current Unix timestamp in milliseconds.",
-		"author":"Boop",
+		"author":"danrodz",
 		"icon":"clock",
 		"tags":"timestamp,unix,time,epoch,milliseconds,ms"
 	}

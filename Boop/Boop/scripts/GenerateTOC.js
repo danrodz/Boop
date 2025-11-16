@@ -3,7 +3,7 @@
   "api": 1,
   "name": "Generate Table of Contents",
   "description": "Generate a table of contents from Markdown headers with nested structure",
-  "author": "Boop",
+  "author":"danrodz",
   "icon": "list",
   "tags": "markdown,toc,table of contents,headers"
 }

@@ -3,7 +3,7 @@
    "api": 1,
    "name": "Number to Roman",
    "description": "Converts decimal numbers (1-3999) to Roman numerals.",
-   "author": "Boop",
+   "author":"danrodz",
    "icon": "metamorphose",
    "tags": "roman,numeral,decimal,convert"
  }
