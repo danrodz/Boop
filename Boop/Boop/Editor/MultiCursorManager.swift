@@ -202,6 +202,31 @@ class MultiCursorManager {
 
     /// Get all cursor positions as NSRange array
     func getCursorRanges() -> [NSRange] {
+        guard let textView = textView else {
+            return cursorPositions.map { NSRange(location: $0, length: 0) }
+        }
+
+        // If we have actual selections with length, return those
+        // Otherwise return insertion points
+        let selectedRanges = textView.selectedRanges as! [NSRange]
+        if selectedRanges.count > 1 || (selectedRanges.first?.length ?? 0) > 0 {
+            return selectedRanges
+        }
+
         return cursorPositions.map { NSRange(location: $0, length: 0) }
+    }
+
+    /// Update cursor positions from current text view selections
+    func updateFromTextViewSelections() {
+        guard let textView = textView else { return }
+        let ranges = textView.selectedRanges as! [NSRange]
+
+        if ranges.count > 1 {
+            cursorPositions = ranges.map { $0.location }
+            isMultiCursorActive = true
+        } else if ranges.count == 1 && ranges[0].length == 0 {
+            cursorPositions = [ranges[0].location]
+            isMultiCursorActive = false
+        }
     }
 }

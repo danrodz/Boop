@@ -43,12 +43,25 @@ class MainViewController: NSViewController {
         multiCursorManager = MultiCursorManager(textView: textView)
 
         // Create overlay view for multi-cursor rendering
-        multiCursorOverlay = MultiCursorOverlayView(frame: editorView.bounds)
-        multiCursorOverlay?.textView = textView
-        multiCursorOverlay?.autoresizingMask = [.width, .height]
+        // Position it to exactly cover the text view
+        if let scrollView = editorView.enclosingScrollView {
+            multiCursorOverlay = MultiCursorOverlayView(frame: scrollView.documentVisibleRect)
+            multiCursorOverlay?.textView = textView
+            multiCursorOverlay?.autoresizingMask = [.width, .height]
 
-        if let overlay = multiCursorOverlay {
-            editorView.addSubview(overlay)
+            if let overlay = multiCursorOverlay {
+                // Add as subview of the clip view for proper scrolling
+                scrollView.contentView.addSubview(overlay, positioned: .above, relativeTo: editorView)
+            }
+        } else {
+            // Fallback: add directly to editor view
+            multiCursorOverlay = MultiCursorOverlayView(frame: editorView.bounds)
+            multiCursorOverlay?.textView = textView
+            multiCursorOverlay?.autoresizingMask = [.width, .height]
+
+            if let overlay = multiCursorOverlay {
+                editorView.addSubview(overlay)
+            }
         }
 
         // Add click gesture recognizer for Cmd+Click
@@ -108,7 +121,19 @@ class MainViewController: NSViewController {
 
     private func updateMultiCursorOverlay() {
         guard let manager = multiCursorManager else { return }
-        multiCursorOverlay?.cursorPositions = manager.isMultiCursorActive ? manager.getCursorRanges().map { $0.location } : []
+        let positions = manager.isMultiCursorActive ? manager.getCursorRanges().map { $0.location } : []
+        multiCursorOverlay?.cursorPositions = positions
+
+        // Update overlay frame to match text view bounds
+        if let scrollView = editorView.enclosingScrollView {
+            multiCursorOverlay?.frame = scrollView.documentVisibleRect
+        } else {
+            multiCursorOverlay?.frame = editorView.bounds
+        }
+    }
+
+    private func resetCursorBlinking() {
+        multiCursorOverlay?.resetBlinking()
     }
     @IBAction func openHelp(_ sender: Any) {
         open(url: "https://boop.okat.best/docs/")
@@ -196,11 +221,17 @@ extension MainViewController: SyntaxTextViewDelegate {
 
     func didChangeText(_ syntaxTextView: SyntaxTextView) {
         updateMultiCursorOverlay()
+        // Reset cursor blinking when user types
+        resetCursorBlinking()
     }
 
     func didChangeSelectedRange(_ syntaxTextView: SyntaxTextView, selectedRange: NSRange) {
+        // Sync multi-cursor manager with text view selections
+        multiCursorManager?.updateFromTextViewSelections()
         // Update overlay when selection changes
         updateMultiCursorOverlay()
+        // Reset cursor blinking when selection changes
+        resetCursorBlinking()
     }
 
     func didChangeFont(_ font: Font) {

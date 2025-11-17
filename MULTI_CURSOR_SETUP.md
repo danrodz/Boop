@@ -34,7 +34,11 @@ This document describes the multi-cursor editing implementation for Boop, simila
 
 2. **MultiCursorOverlayView.swift** (`Boop/Boop/Editor/`)
    - Custom NSView for rendering multiple cursors
-   - Implements cursor blinking animation
+   - Implements cursor blinking animation synchronized with NSTextView
+   - Observes scroll events for proper cursor positioning during scrolling
+   - Hides native cursor when multi-cursor is active
+   - Optimizes drawing by only rendering visible cursors
+   - Handles line wrapping and coordinate conversion edge cases
    - Transparent to mouse events (pass-through)
 
 3. **MainViewController.swift** (modified)
@@ -184,11 +188,31 @@ MainViewController
 - **Language**: Swift 5+
 - **Dependencies**: SavannaKit (already included)
 
+## Improvements & Optimizations
+
+### Cursor Rendering
+- ✅ **Scroll handling**: Overlay updates automatically when scrolling
+- ✅ **Line wrapping support**: Properly handles wrapped lines and line endings
+- ✅ **Visible rect optimization**: Only draws cursors in visible area for performance
+- ✅ **Coordinate conversion**: Robust conversion between text view and overlay coordinates
+
+### Cursor Blinking
+- ✅ **Synchronized blinking**: Matches NSTextView's blink rate (0.53s)
+- ✅ **Native cursor hiding**: Hides native cursor when multi-cursor is active
+- ✅ **Blink reset on typing**: Cursor visibility resets when user types or changes selection
+- ✅ **Proper cleanup**: Removes observers and timers on dealloc
+
+### Text Operations
+- ✅ **Selection tracking**: Automatically syncs with NSTextView's selectedRanges
+- ✅ **Multi-selection support**: Handles both cursors (insertion points) and selections (ranges with length)
+- ✅ **Script integration**: Works seamlessly with existing ScriptManager
+- ✅ **Text change handling**: Updates cursor positions after insertions/deletions
+
 ## Known Limitations
 
-- Multi-cursor overlay may need refinement for edge cases (scrolling, line wrapping)
-- The cursor blinking is independent from NSTextView's native cursor
-- Some advanced text operations may not fully support multi-cursor yet
+- Column/block selection mode not yet implemented
+- Some advanced editing features (like rectangular selection) may need additional work
+- Performance with extremely large files (>1MB) not extensively tested
 
 ## Future Enhancements
 
