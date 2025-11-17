@@ -91,6 +91,16 @@ class MainViewController: NSViewController {
         updateMultiCursorOverlay()
     }
 
+    @IBAction func selectNextOccurrence(_ sender: Any) {
+        multiCursorManager?.selectNextOccurrence()
+        updateMultiCursorOverlay()
+    }
+
+    @IBAction func selectAllOccurrences(_ sender: Any) {
+        multiCursorManager?.selectAllOccurrences()
+        updateMultiCursorOverlay()
+    }
+
     @IBAction func clearAllCursors(_ sender: Any) {
         multiCursorManager?.clearAllCursors()
         updateMultiCursorOverlay()
@@ -144,6 +154,18 @@ class MainViewController: NSViewController {
     override func keyDown(with event: NSEvent) {
         // Handle keyboard shortcuts for multi-cursor operations
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+
+        // Cmd+G: Select next occurrence (like IntelliJ's Alt+J)
+        if event.charactersIgnoringModifiers == "g" && flags == .command {
+            selectNextOccurrence(self)
+            return
+        }
+
+        // Cmd+Ctrl+G: Select all occurrences (like IntelliJ's Cmd+Ctrl+G)
+        if event.charactersIgnoringModifiers == "g" && flags.contains([.command, .control]) {
+            selectAllOccurrences(self)
+            return
+        }
 
         // Cmd+D: Add cursor at next occurrence
         if event.charactersIgnoringModifiers == "d" && flags.contains(.command) && !flags.contains(.shift) {

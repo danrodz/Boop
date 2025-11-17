@@ -85,6 +85,66 @@ class MultiCursorManager {
         }
     }
 
+    /// Select next occurrence of selected text (like IntelliJ's Alt+J / Cmd+G)
+    /// This maintains selections (not just cursors) and allows progressive selection of matching text
+    func selectNextOccurrence() {
+        guard let textView = textView else { return }
+
+        let currentRanges = textView.selectedRanges as! [NSRange]
+        guard let lastRange = currentRanges.last, lastRange.length > 0 else { return }
+
+        let selectedText = (textView.string as NSString).substring(with: lastRange)
+        let searchStart = lastRange.upperBound
+        let searchRange = NSRange(location: searchStart, length: textView.string.count - searchStart)
+
+        if let foundRange = (textView.string as NSString).range(of: selectedText, options: [], range: searchRange),
+           foundRange.location != NSNotFound {
+
+            // Add the new selection to existing selections
+            var newRanges = currentRanges
+            newRanges.append(foundRange)
+            textView.selectedRanges = newRanges as [NSValue]
+
+            // Update cursor positions to track all selections
+            cursorPositions = newRanges.map { $0.location }
+            isMultiCursorActive = newRanges.count > 1
+
+            // Scroll to show the newly selected range
+            textView.scrollRangeToVisible(foundRange)
+        }
+    }
+
+    /// Select all occurrences of currently selected text (like IntelliJ's Cmd+Ctrl+G)
+    func selectAllOccurrences() {
+        guard let textView = textView else { return }
+        guard let currentRange = textView.selectedRanges.first as? NSRange else { return }
+        guard currentRange.length > 0 else { return }
+
+        let selectedText = (textView.string as NSString).substring(with: currentRange)
+        let fullText = textView.string as NSString
+
+        var foundRanges: [NSRange] = []
+        var searchRange = NSRange(location: 0, length: fullText.length)
+
+        while searchRange.location < fullText.length {
+            let range = fullText.range(of: selectedText, options: [], range: searchRange)
+
+            if range.location == NSNotFound {
+                break
+            }
+
+            foundRanges.append(range)
+            searchRange.location = range.upperBound
+            searchRange.length = fullText.length - searchRange.location
+        }
+
+        if foundRanges.count > 1 {
+            textView.selectedRanges = foundRanges as [NSValue]
+            cursorPositions = foundRanges.map { $0.location }
+            isMultiCursorActive = true
+        }
+    }
+
     /// Add cursors at all occurrences of selected text
     func addCursorsAtAllOccurrences() {
         guard let textView = textView else { return }

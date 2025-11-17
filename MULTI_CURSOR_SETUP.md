@@ -11,12 +11,14 @@ This document describes the multi-cursor editing implementation for Boop, simila
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd + Click` | Add cursor at clicked position |
-| `Cmd + D` | Add cursor at next occurrence of selected text |
-| `Cmd + Shift + L` | Add cursors at all occurrences of selected text |
-| `Esc` | Clear all cursors (return to single cursor mode) |
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| `Cmd + Click` | Add cursor at clicked position | Place multiple cursors manually |
+| `Cmd + G` | **Select next occurrence** | Select next occurrence of selected text (like IntelliJ's Alt+J) |
+| `Cmd + Ctrl + G` | **Select all occurrences** | Select all occurrences of selected text (like IntelliJ's Cmd+Ctrl+G) |
+| `Cmd + D` | Add cursor at next occurrence | Add insertion point at next occurrence |
+| `Cmd + Shift + L` | Add cursors at all occurrences | Add insertion points at all occurrences |
+| `Esc` | Clear all cursors | Return to single cursor mode |
 
 ### Files Added
 
@@ -24,6 +26,11 @@ This document describes the multi-cursor editing implementation for Boop, simila
    - Manages cursor positions and state
    - Handles adding/removing cursors
    - Provides methods for finding next/all occurrences
+   - **New methods:**
+     - `selectNextOccurrence()` - Select next occurrence (maintains selections)
+     - `selectAllOccurrences()` - Select all occurrences at once
+     - `addCursorAtNextOccurrence()` - Add cursor at next occurrence
+     - `addCursorsAtAllOccurrences()` - Add cursors at all occurrences
 
 2. **MultiCursorOverlayView.swift** (`Boop/Boop/Editor/`)
    - Custom NSView for rendering multiple cursors
@@ -62,6 +69,13 @@ To add menu items for multi-cursor operations:
 1. Open `MainMenu.xib` in Interface Builder
 2. Locate the "Edit" menu
 3. Add new menu items:
+   - **Select Next Occurrence** (⌘G)
+     - Action: `selectNextOccurrence:`
+     - Target: First Responder
+   - **Select All Occurrences** (⌘^G)
+     - Action: `selectAllOccurrences:`
+     - Target: First Responder
+   - **---** (Separator)
    - **Add Cursor at Next Occurrence** (⌘D)
      - Action: `addCursorAtNextOccurrence:`
      - Target: First Responder
@@ -74,19 +88,42 @@ To add menu items for multi-cursor operations:
 
 ## Usage
 
-### Adding Cursors
+### Select Next Occurrence (IntelliJ-style)
+
+The **recommended workflow** for multi-selection editing:
+
+1. **Select text**: Double-click a word or select any text
+2. **Cmd+G repeatedly**: Each press selects the next occurrence of that text
+   - All occurrences remain selected (highlighted)
+   - You can type to replace all selected occurrences at once
+   - Press Cmd+G again to add more occurrences
+3. **Cmd+Ctrl+G**: Select ALL occurrences at once
+4. **Esc**: Clear selections and return to single cursor
+
+**Example workflow:**
+```
+1. Double-click "foo" → "foo" is selected
+2. Press Cmd+G → Next "foo" is also selected (2 selections)
+3. Press Cmd+G → Next "foo" is also selected (3 selections)
+4. Type "bar" → All three "foo" instances are replaced with "bar"
+```
+
+### Adding Multiple Cursors
+
+Alternative workflow for placing cursors (insertion points) without selections:
 
 1. **Cmd + Click**: Click at different positions while holding Cmd to add multiple cursors
 2. **Cmd + D**: Select text, then press Cmd+D to add a cursor at the next occurrence
 3. **Cmd + Shift + L**: Select text, then press Cmd+Shift+L to add cursors at all occurrences
 
-### Editing with Multiple Cursors
+### Editing with Multiple Cursors/Selections
 
-Once multiple cursors are active:
-- Type normally - text appears at all cursor positions
+Once multiple cursors or selections are active:
+- Type normally - text appears at all cursor positions or replaces all selections
 - Use arrow keys - all cursors move together
 - Copy/paste - operations apply to all cursors
 - Run scripts - scripts execute on all selected ranges
+- Delete/backspace - removes characters at all cursor positions
 
 ### Clearing Cursors
 
@@ -116,12 +153,30 @@ MainViewController
 
 ## Testing
 
+### Test Select Next Occurrence (Recommended)
+
 1. Build and run the app
-2. Type some text
-3. Try Cmd+Click to add cursors
-4. Type and verify text appears at all cursor positions
-5. Select a word and press Cmd+D to find next occurrence
-6. Press Esc to clear cursors
+2. Type some text with repeated words: `hello world hello there hello again`
+3. Double-click the first "hello" to select it
+4. Press **Cmd+G** - the next "hello" should also become selected
+5. Press **Cmd+G** again - the third "hello" should also become selected
+6. Type "goodbye" - all three "hello" instances should be replaced with "goodbye"
+7. Press Esc to clear selections
+
+### Test Select All Occurrences
+
+1. Type text with repeated words
+2. Select one instance
+3. Press **Cmd+Ctrl+G** - all instances should be selected at once
+4. Type to replace all at once
+
+### Test Multi-Cursor Mode
+
+1. Type some text
+2. Try **Cmd+Click** to add cursors at different positions
+3. Type and verify text appears at all cursor positions
+4. Select a word and press **Cmd+D** to add cursor at next occurrence
+5. Press Esc to clear cursors
 
 ## Compatibility
 
