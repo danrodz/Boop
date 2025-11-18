@@ -1,18 +1,14 @@
 /**
-  {
-    "api": 1,
-    "name": "Remove Numbers",
-    "description": "Removes all numbers from the text",
-    "author": "Boop",
-    "icon": "trash",
-    "tags": "remove,numbers,filter,digits"
-  }
+{
+  "api": 1,
+  "name": "Remove All Numbers",
+  "description": "Removes all numbers from text",
+  "author": "Boop",
+  "icon": "scissors",
+  "tags": "numbers,remove,digit"
+}
 **/
 
 function main(state) {
-  try {
-    state.text = state.text.replace(/\d+/g, '');
-  } catch (error) {
-    state.postError("Failed to remove numbers");
-  }
+  state.postInfo("Remove All Numbers");
 }
