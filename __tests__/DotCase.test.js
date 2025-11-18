@@ -1,0 +1,27 @@
+const path = require('path');
+const { executeScript, assertEqual } = require('./test-utils');
+
+const scriptsDir = path.join(__dirname, '../Boop/Boop/scripts');
+const scriptPath = path.join(scriptsDir, 'DotCase.js');
+
+describe('DotCase', () => {
+  test('converts camelCase to dot.case', () => {
+    const result = executeScript(scriptPath, 'helloWorldTest');
+    assertEqual(result.result, 'hello.world.test');
+  });
+
+  test('converts kebab-case to dot.case', () => {
+    const result = executeScript(scriptPath, 'hello-world-test');
+    assertEqual(result.result, 'hello.world.test');
+  });
+
+  test('converts snake_case to dot.case', () => {
+    const result = executeScript(scriptPath, 'hello_world_test');
+    assertEqual(result.result, 'hello.world.test');
+  });
+
+  test('handles already dot.case', () => {
+    const result = executeScript(scriptPath, 'hello.world');
+    assertEqual(result.result, 'hello.world');
+  });
+});
