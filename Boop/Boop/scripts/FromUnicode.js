@@ -15,7 +15,7 @@ function main(state) {
 }
 
 function fromUnicode(str) {
-  return str.split("\\u").map(u => {
+  return str.split("\\u").filter(u => u.length > 0).map(u => {
     return String.fromCharCode(parseInt(u, 16));
   }).join("");
 }

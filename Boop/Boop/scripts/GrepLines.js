@@ -18,7 +18,15 @@ function main(state) {
     }
 
     const pattern = lines[0];
-    const regex = new RegExp(pattern);
+
+    // Validate regex pattern
+    let regex;
+    try {
+      regex = new RegExp(pattern);
+    } catch (e) {
+      state.postError("Invalid regex pattern: " + e.message);
+      return;
+    }
 
     const filtered = lines.slice(1).filter(line => regex.test(line));
     state.text = filtered.join("\n");

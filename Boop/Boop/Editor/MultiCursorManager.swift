@@ -79,9 +79,10 @@ class MultiCursorManager {
             addCursor(at: range.location)
 
             // Update selections to include the new range
-            var ranges = textView.selectedRanges as! [NSRange]
-            ranges.append(range)
-            textView.selectedRanges = ranges as [NSValue]
+            guard let ranges = textView.selectedRanges as? [NSRange] else { return }
+            var updatedRanges = ranges
+            updatedRanges.append(range)
+            textView.selectedRanges = updatedRanges as [NSValue]
         }
     }
 
@@ -90,8 +91,8 @@ class MultiCursorManager {
     func selectNextOccurrence() {
         guard let textView = textView else { return }
 
-        let currentRanges = textView.selectedRanges as! [NSRange]
-        guard let lastRange = currentRanges.last, lastRange.length > 0 else { return }
+        guard let currentRanges = textView.selectedRanges as? [NSRange],
+              let lastRange = currentRanges.last, lastRange.length > 0 else { return }
 
         let selectedText = (textView.string as NSString).substring(with: lastRange)
         let searchStart = lastRange.upperBound
@@ -208,7 +209,10 @@ class MultiCursorManager {
 
         // If we have actual selections with length, return those
         // Otherwise return insertion points
-        let selectedRanges = textView.selectedRanges as! [NSRange]
+        guard let selectedRanges = textView.selectedRanges as? [NSRange] else {
+            return cursorPositions.map { NSRange(location: $0, length: 0) }
+        }
+
         if selectedRanges.count > 1 || (selectedRanges.first?.length ?? 0) > 0 {
             return selectedRanges
         }
@@ -219,7 +223,7 @@ class MultiCursorManager {
     /// Update cursor positions from current text view selections
     func updateFromTextViewSelections() {
         guard let textView = textView else { return }
-        let ranges = textView.selectedRanges as! [NSRange]
+        guard let ranges = textView.selectedRanges as? [NSRange] else { return }
 
         if ranges.count > 1 {
             cursorPositions = ranges.map { $0.location }
