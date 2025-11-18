@@ -50,11 +50,23 @@ class PopoverViewController: NSViewController {
                 
             // Key codes:
             let kVKTab = 0x30
+            let kVKF = 0x03
             // 125 is down arrow
             // 126 is up
             // 53 is escape
             // 36 is enter
-       
+
+            // Cmd+F: Toggle favorite
+            if theEvent.keyCode == kVKF && theEvent.modifierFlags.contains(.command) && self.enabled {
+                if let script = self.tableViewController.selectedScript {
+                    script.toggleFavorite()
+                    self.tableView.reloadData()
+                    let status = script.isFavorite ? "Added to favorites" : "Removed from favorites"
+                    self.statusView.setStatus(.info(status))
+                }
+                didSomething = true
+            }
+
             if theEvent.keyCode == 53 && self.enabled { // ESCAPE
                 
                 // Let's dismiss the popover
@@ -176,10 +188,47 @@ extension PopoverViewController: NSTextFieldDelegate {
         guard (obj.object as? SearchField) == searchField else {
             return
         }
-        
-        let results = scriptManager.search(searchField.stringValue)
+
+        let query = searchField.stringValue
+
+        var results: [Script]
+
+        // Show favorites and recents when search is empty
+        if query.isEmpty {
+            let favorites = scriptManager.getFavoriteScripts()
+            let recents = scriptManager.getRecentScripts()
+
+            // Combine favorites and recents, removing duplicates
+            var seen = Set<String>()
+            results = []
+
+            for script in favorites {
+                if !seen.contains(script.identifier) {
+                    results.append(script)
+                    seen.insert(script.identifier)
+                }
+            }
+
+            for script in recents {
+                if !seen.contains(script.identifier) {
+                    results.append(script)
+                    seen.insert(script.identifier)
+                }
+            }
+
+            // Update help text
+            if !results.isEmpty {
+                statusView.setStatus(.help("⭐ Favorites & Recent Scripts (Cmd+F to favorite)"))
+            } else {
+                statusView.setStatus(.help("Select your action (Cmd+F to favorite)"))
+            }
+        } else {
+            results = scriptManager.search(query)
+            statusView.setStatus(.help("Select your action (Cmd+F to favorite)"))
+        }
+
         tableViewController.results = results
-        
+
         self.tableHeightConstraint.constant = CGFloat(45 * min(5, results.count) + ((results.count != 0) ? 20 : 0))
     }
 }

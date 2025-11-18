@@ -11,12 +11,16 @@ import JavaScriptCore
 import Fuse
 
 class Script: NSObject {
-    
+
     var isBuiltInt: Bool
     var url: URL
     var scriptCode: String
-    
-    
+
+    // Unique identifier based on script filename
+    lazy var identifier: String = {
+        return url.lastPathComponent
+    }()
+
     lazy var context: JSContext = { [unowned self] in
         let context: JSContext = JSContext()
         context.name = self.name ?? "Unknown Script"
@@ -81,9 +85,21 @@ class Script: NSObject {
     }
     
     func run(with execution: ScriptExecution) {
+        // Note: Timeout handling is complex with JavaScriptCore's single-threaded model
+        // For now, we rely on the script manager to check file sizes before execution
         main.call(withArguments: [execution])
     }
-    
+
+    // MARK: - Favorites & Recents
+
+    var isFavorite: Bool {
+        return ScriptPreferences.shared.isFavorite(identifier)
+    }
+
+    func toggleFavorite() {
+        ScriptPreferences.shared.toggleFavorite(identifier)
+    }
+
 }
 
 extension Script: Fuseable {
