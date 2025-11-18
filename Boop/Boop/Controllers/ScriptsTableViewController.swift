@@ -44,9 +44,11 @@ class ScriptsTableViewController: NSViewController, NSTableViewDelegate, NSTable
             fatalError("Missing script for index \(row).")
         }
         
-        view.titleLabel.stringValue = script.name ?? "No Name 🤔"
+        let scriptName = script.name ?? "No Name 🤔"
+        let favoritePrefix = script.isFavorite ? "⭐ " : ""
+        view.titleLabel.stringValue = favoritePrefix + scriptName
         view.subtitleLabel.stringValue = script.desc ?? "No Description 😢"
-        
+
         view.imageView?.image = self.scriptIcon(identifier: script.icon)
         
         return view
