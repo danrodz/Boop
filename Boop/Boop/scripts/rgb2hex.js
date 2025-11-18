@@ -19,7 +19,7 @@ function main(state) {
 
   try {
     rgbArray.forEach(c => {
-      hex += parseInt(c).toString(16);
+      hex += parseInt(c).toString(16).padStart(2, '0');
     });
   }
   catch (error) {
