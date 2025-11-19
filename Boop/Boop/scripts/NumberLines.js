@@ -10,6 +10,7 @@
 **/
 
 function main(state) {
-  // Placeholder - basic implementation
-  state.postInfo("Script: Add Line Numbers");
+  const lines = state.text.split('\n');
+  const numbered = lines.map((line, i) => (i + 1) + ' ' + line);
+  state.text = numbered.join('\n');
 }

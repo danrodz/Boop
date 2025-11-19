@@ -10,6 +10,5 @@
 **/
 
 function main(state) {
-  // Script implementation
-  state.postInfo("Collapse Whitespace");
+  state.text = state.text.replace(/\s+/g, ' ');
 }

@@ -10,5 +10,11 @@
 **/
 
 function main(state) {
-  state.postInfo("Extract JSON Keys");
+  try {
+    const obj = JSON.parse(state.text);
+    const keys = Object.keys(obj);
+    state.text = keys.join('\n');
+  } catch (e) {
+    state.postError("Invalid JSON: " + e.message);
+  }
 }

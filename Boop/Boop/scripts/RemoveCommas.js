@@ -10,6 +10,5 @@
 **/
 
 function main(state) {
-  // Script implementation
-  state.postInfo("Remove Thousands Separators");
+  state.text = state.text.replace(/,/g, '');
 }

@@ -10,6 +10,7 @@
 **/
 
 function main(state) {
-  // Script implementation
-  state.postInfo("Lowercase First Letter");
+  if (state.text.length > 0) {
+    state.text = state.text.charAt(0).toLowerCase() + state.text.slice(1);
+  }
 }

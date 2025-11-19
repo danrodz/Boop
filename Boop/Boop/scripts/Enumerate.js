@@ -10,5 +10,7 @@
 **/
 
 function main(state) {
-  state.postInfo("Enumerate Lines (1.)");
+  const lines = state.text.split('\n');
+  const enumerated = lines.map((line, i) => (i + 1) + '. ' + line);
+  state.text = enumerated.join('\n');
 }

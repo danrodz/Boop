@@ -10,5 +10,5 @@
 **/
 
 function main(state) {
-  state.postInfo("Keep Only Numbers");
+  state.text = state.text.replace(/[^\d]/g, '');
 }

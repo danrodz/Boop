@@ -10,5 +10,7 @@
 **/
 
 function main(state) {
-  state.postInfo("Add Star Prefix");
+  const lines = state.text.split('\n');
+  const starred = lines.map(line => '* ' + line);
+  state.text = starred.join('\n');
 }

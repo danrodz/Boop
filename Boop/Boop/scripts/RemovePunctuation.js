@@ -10,5 +10,5 @@
 **/
 
 function main(state) {
-  state.postInfo("Remove Punctuation");
+  state.text = state.text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
 }

@@ -10,5 +10,15 @@
 **/
 
 function main(state) {
-  state.postInfo("Add Custom Prefix");
+  const lines = state.text.split('\n');
+  if (lines.length < 2) {
+    state.postError("Prefix on line 1, text follows");
+    return;
+  }
+
+  const prefix = lines[0];
+  const textLines = lines.slice(1);
+  const prefixed = textLines.map(line => prefix + line);
+
+  state.text = prefixed.join('\n');
 }

@@ -10,5 +10,7 @@
 **/
 
 function main(state) {
-  state.postInfo("Add Dash Prefix");
+  const lines = state.text.split('\n');
+  const dashed = lines.map(line => '- ' + line);
+  state.text = dashed.join('\n');
 }

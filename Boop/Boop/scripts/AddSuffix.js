@@ -10,5 +10,15 @@
 **/
 
 function main(state) {
-  state.postInfo("Add Custom Suffix");
+  const lines = state.text.split('\n');
+  if (lines.length < 2) {
+    state.postError("Suffix on line 1, text follows");
+    return;
+  }
+
+  const suffix = lines[0];
+  const textLines = lines.slice(1);
+  const suffixed = textLines.map(line => line + suffix);
+
+  state.text = suffixed.join('\n');
 }

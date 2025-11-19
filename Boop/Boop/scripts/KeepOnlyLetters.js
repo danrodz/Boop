@@ -10,5 +10,5 @@
 **/
 
 function main(state) {
-  state.postInfo("Keep Only Letters");
+  state.text = state.text.replace(/[^a-zA-Z]/g, '');
 }

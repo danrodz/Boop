@@ -10,5 +10,7 @@
 **/
 
 function main(state) {
-  state.postInfo("Extract from Parentheses");
+  const matches = state.text.match(/\(([^\)]*)\)/g) || [];
+  const extracted = matches.map(m => m.slice(1, -1));
+  state.text = extracted.join('\n');
 }

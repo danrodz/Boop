@@ -10,6 +10,15 @@
 **/
 
 function main(state) {
-  // Placeholder - basic implementation
-  state.postInfo("Script: Filter Lines by Pattern");
+  const lines = state.text.split('\n');
+  if (lines.length < 2) {
+    state.postError("Pattern on line 1, text follows");
+    return;
+  }
+
+  const pattern = new RegExp(lines[0]);
+  const textLines = lines.slice(1);
+  const filtered = textLines.filter(line => pattern.test(line));
+
+  state.text = filtered.join('\n');
 }

@@ -10,6 +10,7 @@
 **/
 
 function main(state) {
-  // Placeholder - basic implementation
-  state.postInfo("Script: Remove Line Numbers");
+  const lines = state.text.split('\n');
+  const stripped = lines.map(line => line.replace(/^\d+\s+/, ''));
+  state.text = stripped.join('\n');
 }

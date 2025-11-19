@@ -10,6 +10,7 @@
 **/
 
 function main(state) {
-  // Script implementation
-  state.postInfo("Uppercase First Letter");
+  if (state.text.length > 0) {
+    state.text = state.text.charAt(0).toUpperCase() + state.text.slice(1);
+  }
 }

@@ -10,5 +10,14 @@
 **/
 
 function main(state) {
-  state.postInfo("Wrap in HTML Tag");
+  const lines = state.text.split('\n');
+  if (lines.length < 2) {
+    state.postError("Tag name on line 1, text follows");
+    return;
+  }
+
+  const tag = lines[0];
+  const text = lines.slice(1).join('\n');
+
+  state.text = '<' + tag + '>' + text + '</' + tag + '>';
 }

@@ -10,5 +10,7 @@
 **/
 
 function main(state) {
-  state.postInfo("Add Bullet Points");
+  const lines = state.text.split('\n');
+  const bulleted = lines.map(line => '• ' + line);
+  state.text = bulleted.join('\n');
 }
