@@ -9,7 +9,11 @@
 }
 **/
 
+const { encode } = require('@boop/base64')
+
 function main(state) {
-  // Script implementation
-  state.postInfo("Base64 Encode (URL-Safe)");
+  let encoded = encode(state.text);
+  // Make URL-safe by replacing + with - and / with _
+  encoded = encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  state.text = encoded;
 }

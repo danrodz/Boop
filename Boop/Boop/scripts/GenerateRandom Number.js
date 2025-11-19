@@ -10,6 +10,12 @@
 **/
 
 function main(state) {
-  // Script implementation
-  state.postInfo("Generate Random Numbers");
+  const count = parseInt(state.text.trim()) || 10;
+  const numbers = [];
+
+  for (let i = 0; i < count; i++) {
+    numbers.push(Math.floor(Math.random() * 1000));
+  }
+
+  state.text = numbers.join('\n');
 }
