@@ -2,53 +2,44 @@
   {
     "api": 1,
     "name": "JSON to CSV",
-    "description": "Converts JSON array to CSV with proper escaping",
+    "description": "Converts JSON array to CSV format",
     "author": "Boop",
-    "icon": "tablecells.fill",
-    "tags": "json,csv,convert,export,table"
+    "icon": "doc.text",
+    "tags": "json,csv,convert,data,export"
   }
 **/
 
 function main(state) {
+  let data;
   try {
-    const data = JSON.parse(state.text);
-
-    if (!Array.isArray(data) || data.length === 0) {
-      state.postError("Input must be a non-empty JSON array");
-      return;
-    }
-
-    // Get all unique keys from all objects
-    const keys = [...new Set(data.flatMap(obj => Object.keys(obj)))];
-
-    // Escape CSV value
-    function escapeCSV(value) {
-      if (value === null || value === undefined) return '';
-
-      const str = String(value);
-
-      // If contains comma, quote, or newline, wrap in quotes and escape quotes
-      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-        return '"' + str.replace(/"/g, '""') + '"';
-      }
-
-      return str;
-    }
-
-    // Build CSV
-    const csv = [];
-
-    // Header row
-    csv.push(keys.map(escapeCSV).join(','));
-
-    // Data rows
-    for (const obj of data) {
-      const row = keys.map(key => escapeCSV(obj[key]));
-      csv.push(row.join(','));
-    }
-
-    state.text = csv.join('\n');
-  } catch (error) {
-    state.postError("Failed to convert JSON: " + error.message);
+    data = JSON.parse(state.text);
+  } catch (e) {
+    state.postError("Invalid JSON");
+    return;
   }
+  
+  if (!Array.isArray(data) || data.length === 0) {
+    state.postError("JSON must be a non-empty array of objects");
+    return;
+  }
+  
+  const headers = Object.keys(data[0]);
+  
+  function escapeCSV(val) {
+    const str = String(val ?? '');
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+  }
+  
+  const rows = [headers.map(escapeCSV).join(',')];
+  
+  for (const obj of data) {
+    const row = headers.map(h => escapeCSV(obj[h]));
+    rows.push(row.join(','));
+  }
+  
+  state.text = rows.join('\n');
+  state.postInfo(`Converted ${data.length} row(s) to CSV`);
 }
