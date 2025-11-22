@@ -1,27 +1,30 @@
 /**
   {
     "api": 1,
-    "name": "Extract All URLs",
-    "description": "Extracts and deduplicates all URLs (http/https)",
+    "name": "Extract URLs",
+    "description": "Extracts all URLs from text",
     "author": "Boop",
-    "icon": "link.circle.fill",
-    "tags": "url,extract,find,parse,link"
+    "icon": "link",
+    "tags": "url,extract,links,http,https"
   }
 **/
 
 function main(state) {
-  // Match http/https URLs
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/g;
-
-  const matches = state.text.match(urlRegex);
+  // Match URLs with various protocols
+  const urlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+  const matches = state.text.match(urlPattern);
 
   if (!matches || matches.length === 0) {
     state.postError("No URLs found");
     return;
   }
 
-  // Deduplicate and sort
-  const unique = [...new Set(matches)].sort();
+  // Clean trailing punctuation that's likely not part of URL
+  const cleaned = matches.map(url => {
+    return url.replace(/[.,;:!?)]+$/, '');
+  });
 
-  state.text = unique.join('\n') + `\n\n(${unique.length} unique URL${unique.length === 1 ? '' : 's'} found)`;
+  const unique = [...new Set(cleaned)];
+
+  state.text = unique.join('\n') + `\n\n---\nFound: ${matches.length} URLs\nUnique: ${unique.length}`;
 }
