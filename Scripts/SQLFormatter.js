@@ -2,53 +2,58 @@
   {
     "api": 1,
     "name": "SQL Formatter",
-    "description": "Formats SQL with proper indentation and keywords",
+    "description": "Formats SQL queries with proper indentation and keyword casing",
     "author": "Boop",
-    "icon": "square.stack.3d.up.fill",
-    "tags": "sql,format,pretty,indent"
+    "icon": "doc.text",
+    "tags": "sql,format,query,database,indent"
   }
 **/
 
 function main(state) {
-  let sql = state.text;
-
-  // Keywords that should start a new line
-  const keywords = [
-    'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER JOIN', 'LEFT JOIN',
-    'RIGHT JOIN', 'OUTER JOIN', 'ON', 'GROUP BY', 'HAVING',
-    'ORDER BY', 'UNION', 'UNION ALL', 'INSERT INTO', 'VALUES',
-    'UPDATE', 'SET', 'DELETE FROM', 'CREATE TABLE', 'ALTER TABLE',
-    'DROP TABLE', 'LIMIT', 'OFFSET'
+  var sql = state.text;
+  
+  var keywords = [
+    "SELECT", "FROM", "WHERE", "AND", "OR", "JOIN", "LEFT JOIN", "RIGHT JOIN",
+    "INNER JOIN", "OUTER JOIN", "FULL JOIN", "CROSS JOIN", "ON", "AS",
+    "ORDER BY", "GROUP BY", "HAVING", "LIMIT", "OFFSET", "UNION", "UNION ALL",
+    "INSERT INTO", "VALUES", "UPDATE", "SET", "DELETE FROM", "CREATE TABLE",
+    "ALTER TABLE", "DROP TABLE", "CREATE INDEX", "DROP INDEX", "PRIMARY KEY",
+    "FOREIGN KEY", "REFERENCES", "NOT NULL", "DEFAULT", "UNIQUE", "CHECK",
+    "IN", "NOT IN", "EXISTS", "NOT EXISTS", "BETWEEN", "LIKE", "IS NULL",
+    "IS NOT NULL", "CASE", "WHEN", "THEN", "ELSE", "END", "DISTINCT",
+    "COUNT", "SUM", "AVG", "MIN", "MAX", "COALESCE", "NULLIF", "CAST"
   ];
-
-  // Convert keywords to uppercase
-  keywords.forEach(keyword => {
-    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-    sql = sql.replace(regex, keyword);
+  
+  // Normalize whitespace
+  sql = sql.replace(/\s+/g, " ").trim();
+  
+  // Uppercase keywords
+  keywords.sort(function(a, b) { return b.length - a.length; });
+  keywords.forEach(function(kw) {
+    var regex = new RegExp("\\b" + kw.replace(/ /g, "\\s+") + "\\b", "gi");
+    sql = sql.replace(regex, kw);
   });
-
-  // Add newlines before major keywords
-  sql = sql.replace(/\s+(SELECT|FROM|WHERE|JOIN|INNER JOIN|LEFT JOIN|RIGHT JOIN|GROUP BY|HAVING|ORDER BY|UNION|LIMIT)\s+/g, '\n$1 ');
-
-  // Add newlines and indent for AND/OR in WHERE clauses
-  sql = sql.replace(/\s+(AND|OR)\s+/g, '\n  $1 ');
-
-  // Format column lists in SELECT
-  sql = sql.replace(/SELECT\s+(.+?)\s+FROM/s, (match, cols) => {
-    if (cols.includes(',')) {
-      const formatted = cols.split(',').map(c => '\n  ' + c.trim()).join(',');
-      return 'SELECT' + formatted + '\nFROM';
-    }
-    return match;
+  
+  // Add newlines before major clauses
+  var majorClauses = ["SELECT", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", 
+                      "LIMIT", "UNION", "INSERT INTO", "VALUES", "UPDATE", "SET",
+                      "DELETE FROM", "CREATE TABLE", "ALTER TABLE"];
+  majorClauses.forEach(function(clause) {
+    sql = sql.replace(new RegExp("\\b" + clause + "\\b", "g"), "\n" + clause);
   });
-
-  // Clean up extra whitespace
-  sql = sql.replace(/\s+/g, ' ').trim();
-
-  // Re-apply newlines (in case they were removed)
-  keywords.forEach(keyword => {
-    sql = sql.replace(new RegExp(`\\s+${keyword}\\s+`, 'g'), `\n${keyword} `);
-  });
-
+  
+  // Add newlines and indentation for JOINs
+  sql = sql.replace(/\b(LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|FULL JOIN|CROSS JOIN|JOIN)\b/g, "\n  $1");
+  
+  // Add newlines for AND/OR in WHERE clauses
+  sql = sql.replace(/\b(AND|OR)\b/g, "\n    $1");
+  
+  // Handle ON clauses
+  sql = sql.replace(/\bON\b/g, "\n    ON");
+  
+  // Clean up and trim
+  sql = sql.trim().replace(/\n\s*\n/g, "\n");
+  
   state.text = sql;
+  state.postInfo("SQL formatted");
 }

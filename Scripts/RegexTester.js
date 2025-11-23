@@ -1,62 +1,95 @@
 /**
   {
     "api": 1,
-    "name": "RegEx Tester & Matcher",
-    "description": "Tests regex pattern and shows all matches with groups",
+    "name": "Regex Tester",
+    "description": "Tests regex pattern against text (first line: pattern, rest: text)",
     "author": "Boop",
-    "icon": "magnifyingglass.circle.fill",
-    "tags": "regex,test,match,pattern,find"
+    "icon": "magnifyingglass",
+    "tags": "regex,test,match,pattern,search"
   }
 **/
 
 function main(state) {
-  try {
-    const lines = state.text.split('\n');
-
-    if (lines.length < 2) {
-      state.postError("Format: Line 1 = regex pattern, Line 2+ = test text");
-      return;
+  var lines = state.text.split("\n");
+  var patternLine = lines[0].trim();
+  var text = lines.slice(1).join("\n");
+  
+  // Extract flags if present (e.g., /pattern/gi)
+  var flags = "g";
+  var pattern = patternLine;
+  
+  if (patternLine.startsWith("/")) {
+    var lastSlash = patternLine.lastIndexOf("/");
+    if (lastSlash > 0) {
+      pattern = patternLine.slice(1, lastSlash);
+      flags = patternLine.slice(lastSlash + 1) || "g";
     }
-
-    const pattern = lines[0];
-    const testText = lines.slice(1).join('\n');
-
-    // Parse pattern and flags
-    const match = pattern.match(/^\/(.+)\/([gimsuvy]*)$/);
-    let regex;
-
-    if (match) {
-      regex = new RegExp(match[1], match[2]);
-    } else {
-      // Assume no delimiters, default to global
-      regex = new RegExp(pattern, 'g');
-    }
-
-    const matches = [...testText.matchAll(regex)];
-
-    if (matches.length === 0) {
-      state.text = `Pattern: ${pattern}\nFlags: ${regex.flags}\n\nNo matches found.`;
-      return;
-    }
-
-    let result = `Pattern: ${pattern}\nFlags: ${regex.flags}\n\nMatches: ${matches.length}\n\n`;
-
-    matches.forEach((match, i) => {
-      result += `Match ${i + 1}: "${match[0]}"\n`;
-      result += `  Index: ${match.index}\n`;
-
-      if (match.length > 1) {
-        result += `  Groups:\n`;
-        for (let j = 1; j < match.length; j++) {
-          result += `    ${j}: "${match[j]}"\n`;
-        }
-      }
-      result += '\n';
-    });
-
-    state.text = result.trim();
-
-  } catch (error) {
-    state.postError("Regex error: " + error.message);
   }
+  
+  var regex;
+  try {
+    regex = new RegExp(pattern, flags);
+  } catch (e) {
+    state.postError("Invalid regex: " + e.message);
+    return;
+  }
+  
+  var matches = [];
+  var match;
+  
+  if (flags.indexOf("g") > -1) {
+    while ((match = regex.exec(text)) !== null) {
+      var groups = [];
+      for (var i = 1; i < match.length; i++) {
+        groups.push("  Group " + i + ": \"" + match[i] + "\"");
+      }
+      
+      matches.push({
+        match: match[0],
+        index: match.index,
+        groups: groups
+      });
+      
+      // Prevent infinite loops with zero-width matches
+      if (match[0].length === 0) regex.lastIndex++;
+    }
+  } else {
+    match = regex.exec(text);
+    if (match) {
+      var groups = [];
+      for (var i = 1; i < match.length; i++) {
+        groups.push("  Group " + i + ": \"" + match[i] + "\"");
+      }
+      matches.push({
+        match: match[0],
+        index: match.index,
+        groups: groups
+      });
+    }
+  }
+  
+  if (matches.length === 0) {
+    state.text = "Pattern: " + pattern + "\nFlags: " + flags + "\n\nNo matches found.";
+    state.postInfo("No matches");
+    return;
+  }
+  
+  var output = [
+    "Pattern: " + pattern,
+    "Flags: " + flags,
+    "Matches: " + matches.length,
+    ""
+  ];
+  
+  matches.forEach(function(m, idx) {
+    output.push("Match " + (idx + 1) + " at index " + m.index + ":");
+    output.push("  \"" + m.match + "\"");
+    if (m.groups.length > 0) {
+      output = output.concat(m.groups);
+    }
+    output.push("");
+  });
+  
+  state.text = output.join("\n");
+  state.postInfo("Found " + matches.length + " match(es)");
 }
