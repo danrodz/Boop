@@ -9,6 +9,23 @@
 	}
 **/
 
+/*
+
+// Alternate Implementation:
+function main(state) {
+  let text = String(state.text || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s_-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  state.text = text;
+}
+
+*/
+
 function main(state) {
 	let text = state.text.trim();
 
