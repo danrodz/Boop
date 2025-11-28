@@ -2,34 +2,37 @@
   {
     "api": 1,
     "name": "JSON to INI",
-    "description": "Convert JSON to INI configuration format",
+    "description": "Convert JSON to INI configuration file format",
     "author": "Boop",
-    "icon": "doc.text",
+    "icon": "gear",
     "tags": "json,ini,config,convert"
   }
 **/
 
 function main(state) {
   try {
-    const json = JSON.parse(state.text);
-    let result = '';
+    const obj = JSON.parse(state.text);
+    let ini = '';
 
-    for (let [key, value] of Object.entries(json)) {
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        // Section
-        result += `[${key}]\n`;
-        for (let [subKey, subValue] of Object.entries(value)) {
-          result += `${subKey}=${subValue}\n`;
+    for (const [section, values] of Object.entries(obj)) {
+      if (values && typeof values === 'object' && !Array.isArray(values)) {
+        ini += `[${section}]\n`;
+        for (const [key, value] of Object.entries(values)) {
+          ini += `${key}=${value}\n`;
         }
-        result += '\n';
+        ini += '\n';
       } else {
-        // Top-level key-value
-        result += `${key}=${value}\n`;
+        ini += `${section}=${values}\n`;
       }
     }
 
-    state.text = result.trim();
+    state.text = ini.trim();
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Converted to INI format");
+    }
   } catch (error) {
-    state.postError("Failed to convert JSON to INI: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to convert JSON to INI: " + error.message);
+    }
   }
 }

@@ -4,49 +4,62 @@
     "name": "JSON to TOML",
     "description": "Convert JSON to TOML format",
     "author": "Boop",
-    "icon": "chevron.left.forwardslash.chevron.right",
+    "icon": "doc",
     "tags": "json,toml,convert,format"
   }
 **/
 
 function main(state) {
   try {
-    const json = JSON.parse(state.text);
+    const obj = JSON.parse(state.text);
+    let toml = '';
 
-    function toToml(obj, prefix = '') {
+    function convertValue(value) {
+      if (typeof value === 'string') return `"${value.replace(/"/g, '\\"')}"`;
+      if (typeof value === 'boolean') return value.toString();
+      if (typeof value === 'number') return value.toString();
+      if (Array.isArray(value)) {
+        const items = value.map(v => convertValue(v)).join(', ');
+        return `[${items}]`;
+      }
+      if (value === null) return 'null';
+      return String(value);
+    }
+
+    function processObject(obj, prefix = '') {
       let result = '';
-      const tables = [];
-      const values = [];
+      const simple = {};
+      const nested = {};
 
-      for (let [key, value] of Object.entries(obj)) {
-        const fullKey = prefix ? `${prefix}.${key}` : key;
-
-        if (value === null) {
-          continue;
-        } else if (typeof value === 'object' && !Array.isArray(value)) {
-          // Nested object - create table
-          tables.push(`\n[${fullKey}]\n${toToml(value, fullKey)}`);
+      for (const [key, value] of Object.entries(obj)) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          nested[key] = value;
         } else {
-          // Simple value
-          let tomlValue;
-          if (typeof value === 'string') {
-            tomlValue = `"${value.replace(/"/g, '\\"')}"`;
-          } else if (Array.isArray(value)) {
-            tomlValue = '[' + value.map(v =>
-              typeof v === 'string' ? `"${v}"` : v
-            ).join(', ') + ']';
-          } else {
-            tomlValue = String(value);
-          }
-          values.push(`${key} = ${tomlValue}`);
+          simple[key] = value;
         }
       }
 
-      return values.join('\n') + (prefix ? '' : tables.join(''));
+      for (const [key, value] of Object.entries(simple)) {
+        result += `${key} = ${convertValue(value)}\n`;
+      }
+
+      for (const [key, value] of Object.entries(nested)) {
+        const section = prefix ? `${prefix}.${key}` : key;
+        result += `\n[${section}]\n`;
+        result += processObject(value, section);
+      }
+
+      return result;
     }
 
-    state.text = toToml(json);
+    toml = processObject(obj);
+    state.text = toml.trim();
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Converted to TOML");
+    }
   } catch (error) {
-    state.postError("Failed to convert JSON to TOML: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to convert JSON to TOML: " + error.message);
+    }
   }
 }

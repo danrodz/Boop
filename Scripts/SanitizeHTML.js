@@ -13,29 +13,36 @@ function main(state) {
   try {
     let html = state.text;
 
-    // Remove script tags and content
+    // Remove <script> tags and their contents
     html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
-    // Remove event handlers
-    html = html.replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
-    html = html.replace(/\son\w+\s*=\s*[^\s>]*/gi, '');
-
-    // Remove iframe
+    // Remove <iframe> tags and their contents
     html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
 
-    // Remove object/embed
-    html = html.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
-    html = html.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
+    // Remove <object> and <embed> tags and their contents
+    html = html.replace(/<(object|embed)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, '');
 
-    // Remove javascript: in links
+    // Remove on* event handler attributes (onclick, onerror, etc.)
+    html = html.replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
+    html = html.replace(/\son\w+\s*=\s*[^\s>]+/gi, '');
+
+    // Remove style attributes
+    html = html.replace(/\sstyle\s*=\s*["'][^"']*["']/gi, '');
+
+    // Strip javascript: protocol
     html = html.replace(/javascript:/gi, '');
 
-    // Remove data: URIs (can be used for XSS)
-    html = html.replace(/data:text\/html/gi, '');
+    // Remove data: URIs in src attributes
+    html = html.replace(/src\s*=\s*["']data:[^"']*["']/gi, 'src=""');
+    html = html.replace(/src\s*=\s*data:[^\s>]*/gi, 'src=""');
 
     state.text = html;
-    state.postInfo("Removed: scripts, event handlers, iframes, embeds");
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Sanitized HTML (basic XSS prevention)");
+    }
   } catch (error) {
-    state.postError("Failed to sanitize HTML: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to sanitize HTML: " + error.message);
+    }
   }
 }

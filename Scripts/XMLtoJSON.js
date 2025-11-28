@@ -2,10 +2,10 @@
   {
     "api": 1,
     "name": "XML to JSON",
-    "description": "Convert XML to JSON format",
+    "description": "Convert simple XML to JSON format",
     "author": "Boop",
-    "icon": "chevron.left.forwardslash.chevron.right",
-    "tags": "xml,json,convert"
+    "icon": "doc",
+    "tags": "xml,json,convert,format"
   }
 **/
 
@@ -13,34 +13,61 @@ function main(state) {
   try {
     const xml = state.text.trim();
 
-    function parseXml(xmlStr) {
-      // Remove XML declaration
-      xmlStr = xmlStr.replace(/<\?xml.*?\?>/g, '');
+    function addValue(obj, key, value) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (Array.isArray(obj[key])) {
+          obj[key].push(value);
+        } else {
+          obj[key] = [obj[key], value];
+        }
+      } else {
+        obj[key] = value;
+      }
+    }
 
-      // Simple XML to JSON parser
+    function parseXML(str) {
       const result = {};
-      const tagRegex = /<(\w+)(?:\s+[^>]*)?>([^<]*)<\/\1>|<(\w+)(?:\s+[^>]*)?\/>/g;
+      const selfClosingPattern = /<([^>\s/]+)([^>]*)\/>/g;
+      const tagPattern = /<([^>\s/]+)([^>]*)>([\s\S]*?)<\/\1>/g;
 
       let match;
-      while ((match = tagRegex.exec(xmlStr)) !== null) {
-        const tagName = match[1] || match[3];
-        const content = match[2] || '';
 
-        if (!result[tagName]) {
-          result[tagName] = content;
-        } else if (Array.isArray(result[tagName])) {
-          result[tagName].push(content);
+      // Self-closing tags
+      while ((match = selfClosingPattern.exec(str)) !== null) {
+        const tag = match[1];
+        addValue(result, tag, null);
+      }
+
+      // Regular tags
+      tagPattern.lastIndex = 0;
+      while ((match = tagPattern.exec(str)) !== null) {
+        const tag = match[1];
+        const content = match[3];
+        const trimmed = content.trim();
+
+        let value;
+        if (trimmed.startsWith('<')) {
+          value = parseXML(trimmed);
         } else {
-          result[tagName] = [result[tagName], content];
+          value = trimmed;
         }
+
+        addValue(result, tag, value);
       }
 
       return result;
     }
 
-    const json = parseXml(xml);
+    const cleaned = xml.replace(/<\?xml[\s\S]*?\?>/i, '').trim();
+    const json = parseXML(cleaned);
+
     state.text = JSON.stringify(json, null, 2);
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Converted to JSON");
+    }
   } catch (error) {
-    state.postError("Failed to parse XML: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Error parsing XML: " + error.message);
+    }
   }
 }

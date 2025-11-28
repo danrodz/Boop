@@ -2,9 +2,9 @@
   {
     "api": 1,
     "name": "INI to JSON",
-    "description": "Convert INI configuration to JSON",
+    "description": "Convert INI configuration file to JSON",
     "author": "Boop",
-    "icon": "doc.text",
+    "icon": "gear",
     "tags": "ini,json,config,convert"
   }
 **/
@@ -15,36 +15,33 @@ function main(state) {
     const result = {};
     let currentSection = null;
 
-    for (let line of lines) {
-      line = line.trim();
+    for (let rawLine of lines) {
+      let line = rawLine.trim();
 
-      // Skip comments and empty lines
       if (!line || line.startsWith(';') || line.startsWith('#')) continue;
 
-      // Section header
       if (line.startsWith('[') && line.endsWith(']')) {
         currentSection = line.slice(1, -1);
         result[currentSection] = {};
         continue;
       }
 
-      // Key-value pair
       const eqIndex = line.indexOf('=');
       if (eqIndex > -1) {
         const key = line.substring(0, eqIndex).trim();
         let value = line.substring(eqIndex + 1).trim();
 
-        // Remove quotes if present
-        if ((value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))) {
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
           value = value.slice(1, -1);
         }
 
-        // Try to parse as number or boolean
         if (value === 'true') value = true;
         else if (value === 'false') value = false;
         else if (!isNaN(value) && value !== '') {
-          value = value.includes('.') ? parseFloat(value) : parseInt(value);
+          value = value.includes('.') ? parseFloat(value) : parseInt(value, 10);
         }
 
         if (currentSection) {
@@ -56,7 +53,10 @@ function main(state) {
     }
 
     state.text = JSON.stringify(result, null, 2);
+    if (typeof state.postInfo === 'function') state.postInfo("Converted to JSON");
   } catch (error) {
-    state.postError("Failed to parse INI: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to parse INI: " + error.message);
+    }
   }
 }
