@@ -2,98 +2,95 @@
   {
     "api": 1,
     "name": "Generate .gitignore",
-    "description": "Generate .gitignore file for various project types",
+    "description": "Generate .gitignore for specified languages/frameworks",
     "author": "Boop",
-    "icon": "doc",
-    "tags": "git,gitignore,generate,vcs"
+    "icon": "doc.text",
+    "tags": "git,gitignore,generate"
   }
 **/
 
 function main(state) {
-  const projectType = state.text.trim().toLowerCase();
+  try {
+    const input = state.text.toLowerCase().trim();
 
-  let gitignore = `# Dependencies
-node_modules/
-vendor/
+    const templates = {
+      'node': [
+        'node_modules/',
+        'npm-debug.log',
+        '.npm',
+        '.env',
+        'dist/',
+        'build/',
+      ],
+      'python': [
+        '__pycache__/',
+        '*.py[cod]',
+        '*$py.class',
+        '.Python',
+        'venv/',
+        'env/',
+        '.env',
+        '*.egg-info/',
+      ],
+      'java': [
+        '*.class',
+        '*.jar',
+        '*.war',
+        'target/',
+        '.gradle/',
+        'build/',
+      ],
+      'rust': [
+        'target/',
+        'Cargo.lock',
+        '**/*.rs.bk',
+      ],
+      'go': [
+        '*.exe',
+        '*.exe~',
+        '*.dll',
+        '*.so',
+        '*.dylib',
+        'vendor/',
+      ],
+      'macos': [
+        '.DS_Store',
+        '.AppleDouble',
+        '.LSOverride',
+        '._*',
+      ],
+      'windows': [
+        'Thumbs.db',
+        'ehthumbs.db',
+        'Desktop.ini',
+        '$RECYCLE.BIN/',
+      ],
+      'vscode': [
+        '.vscode/',
+        '*.code-workspace',
+      ],
+      'jetbrains': [
+        '.idea/',
+        '*.iml',
+        '*.iws',
+      ],
+    };
 
-# Environment
-.env
-.env.local
-.env.*.local
+    let gitignore = '# Generated .gitignore\n\n';
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+    if (templates[input]) {
+      gitignore += `# ${input.toUpperCase()}\n`;
+      gitignore += templates[input].join('\n');
+    } else {
+      // Combine common ones
+      gitignore += '# Node.js\n' + templates.node.join('\n') + '\n\n';
+      gitignore += '# macOS\n' + templates.macos.join('\n') + '\n\n';
+      gitignore += '# IDEs\n' + templates.vscode.join('\n') + '\n';
+      gitignore += templates.jetbrains.join('\n');
+    }
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-`;
-
-  if (projectType.includes('node') || projectType.includes('javascript') || projectType.includes('js')) {
-    gitignore += `# Node.js
-node_modules/
-npm-debug.log
-.npm
-.eslintcache
-.yarn-integrity
-
-# Build
-dist/
-build/
-.next/
-out/
-
-`;
+    state.text = gitignore;
+  } catch (error) {
+    state.postError("Failed to generate .gitignore: " + error.message);
   }
-
-  if (projectType.includes('python') || projectType.includes('py')) {
-    gitignore += `# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-venv/
-env/
-ENV/
-*.egg-info/
-.pytest_cache/
-.coverage
-htmlcov/
-
-`;
-  }
-
-  if (projectType.includes('java')) {
-    gitignore += `# Java
-*.class
-*.jar
-*.war
-target/
-.gradle/
-build/
-
-`;
-  }
-
-  gitignore += `# Build artifacts
-*.o
-*.so
-*.dylib
-*.exe
-*.out
-*.app`;
-
-  state.text = gitignore;
-  state.postInfo("Generated .gitignore");
 }

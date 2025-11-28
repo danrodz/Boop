@@ -140,11 +140,22 @@ class ScriptManager: NSObject {
     }
     
     func runScript(_ script: Script, into editor: SyntaxTextView) {
-        
+
         let fullText = editor.text
-        
+
+        // Performance warning for large files (> 1MB)
+        let textSizeBytes = fullText.utf8.count
+        let oneMB = 1024 * 1024
+        if textSizeBytes > oneMB {
+            let sizeMB = Double(textSizeBytes) / Double(oneMB)
+            statusView.setStatus(.info(String(format: "Processing large file (%.1f MB) - this may take a moment...", sizeMB)))
+        }
+
         lastScript = script
-        
+
+        // Track in recents
+        ScriptPreferences.shared.addRecent(script.identifier)
+
         guard let ranges = editor.contentTextView.selectedRanges as? [NSRange], ranges.reduce(0, { $0 + $1.length }) > 0 else {
             
             let insertPosition = (editor.contentTextView.selectedRanges.first as? NSRange)?.location
@@ -204,17 +215,22 @@ class ScriptManager: NSObject {
         guard textView.shouldChangeText(inRanges: ranges as [NSValue], replacementStrings: values) else {
             return
         }
-        
+
+        // Group all text replacements into a single undo operation
+        textView.undoManager?.beginUndoGrouping()
+
         textView.textStorage?.beginEditing()
-        
+
         pairs.forEach {
             (range, value) in
             textView.textStorage?.replaceCharacters(in: range, with: value)
         }
-        
-        
+
+
         textView.textStorage?.endEditing()
-        
+
+        textView.undoManager?.endUndoGrouping()
+
         textView.didChangeText()
     }
     
@@ -246,14 +262,14 @@ class ScriptManager: NSObject {
     }
     
     static func getBookmarkURL() throws -> URL? {
-        
+
         guard let data = UserDefaults.standard.data(forKey: ScriptManager.userPreferencesDataKey) else {
             // No user path specified, abbandon ship!
             return nil
         }
-        
+
         var isBookmarkStale = false
-                  
+
         let url = try URL.init(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isBookmarkStale)
 
         if(isBookmarkStale) {
@@ -263,10 +279,32 @@ class ScriptManager: NSObject {
         guard url.startAccessingSecurityScopedResource() else {
             return nil
         }
-        
+
         return url
     }
-    
+
+    // MARK: - Favorites & Recents
+
+    func getFavoriteScripts() -> [Script] {
+        let favoriteIDs = ScriptPreferences.shared.getFavorites()
+        return scripts.filter { favoriteIDs.contains($0.identifier) }
+            .sorted { ($0.name ?? "") < ($1.name ?? "") }
+    }
+
+    func getRecentScripts() -> [Script] {
+        let recentIDs = ScriptPreferences.shared.getRecents()
+        var recentScripts: [Script] = []
+
+        // Maintain recents order
+        for id in recentIDs {
+            if let script = scripts.first(where: { $0.identifier == id }) {
+                recentScripts.append(script)
+            }
+        }
+
+        return recentScripts
+    }
+
 }
 
 extension ScriptManager: ScriptDelegate {

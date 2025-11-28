@@ -15,14 +15,15 @@ function main(state) {
     let toml = '';
 
     function convertValue(value) {
-      if (typeof value === 'string') return `"${value}"`;
+      if (typeof value === 'string') return `"${value.replace(/"/g, '\\"')}"`;
       if (typeof value === 'boolean') return value.toString();
       if (typeof value === 'number') return value.toString();
       if (Array.isArray(value)) {
         const items = value.map(v => convertValue(v)).join(', ');
         return `[${items}]`;
       }
-      return value;
+      if (value === null) return 'null';
+      return String(value);
     }
 
     function processObject(obj, prefix = '') {
@@ -30,21 +31,18 @@ function main(state) {
       const simple = {};
       const nested = {};
 
-      // Separate simple and nested values
       for (const [key, value] of Object.entries(obj)) {
-        if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
           nested[key] = value;
         } else {
           simple[key] = value;
         }
       }
 
-      // Write simple values
       for (const [key, value] of Object.entries(simple)) {
         result += `${key} = ${convertValue(value)}\n`;
       }
 
-      // Write nested objects as sections
       for (const [key, value] of Object.entries(nested)) {
         const section = prefix ? `${prefix}.${key}` : key;
         result += `\n[${section}]\n`;
@@ -56,8 +54,12 @@ function main(state) {
 
     toml = processObject(obj);
     state.text = toml.trim();
-    state.postInfo("Converted to TOML");
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Converted to TOML");
+    }
   } catch (error) {
-    state.postError(`Invalid JSON: ${error.message}`);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to convert JSON to TOML: " + error.message);
+    }
   }
 }

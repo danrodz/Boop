@@ -10,32 +10,53 @@
 **/
 
 function main(state) {
-  const lines = state.text.split('\n');
-  const obj = {};
-  let currentSection = null;
+  try {
+    const lines = state.text.split('\n');
+    const result = {};
+    let currentSection = null;
 
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(';') || trimmed.startsWith('#')) return;
+    for (let rawLine of lines) {
+      let line = rawLine.trim();
 
-    // Section header
-    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-      currentSection = trimmed.slice(1, -1);
-      obj[currentSection] = {};
-    }
-    // Key-value pair
-    else if (trimmed.includes('=')) {
-      const [key, ...valueParts] = trimmed.split('=');
-      const value = valueParts.join('=').trim();
+      if (!line || line.startsWith(';') || line.startsWith('#')) continue;
 
-      if (currentSection) {
-        obj[currentSection][key.trim()] = value;
-      } else {
-        obj[key.trim()] = value;
+      if (line.startsWith('[') && line.endsWith(']')) {
+        currentSection = line.slice(1, -1);
+        result[currentSection] = {};
+        continue;
+      }
+
+      const eqIndex = line.indexOf('=');
+      if (eqIndex > -1) {
+        const key = line.substring(0, eqIndex).trim();
+        let value = line.substring(eqIndex + 1).trim();
+
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
+
+        if (value === 'true') value = true;
+        else if (value === 'false') value = false;
+        else if (!isNaN(value) && value !== '') {
+          value = value.includes('.') ? parseFloat(value) : parseInt(value, 10);
+        }
+
+        if (currentSection) {
+          result[currentSection][key] = value;
+        } else {
+          result[key] = value;
+        }
       }
     }
-  });
 
-  state.text = JSON.stringify(obj, null, 2);
-  state.postInfo("Converted to JSON");
+    state.text = JSON.stringify(result, null, 2);
+    if (typeof state.postInfo === 'function') state.postInfo("Converted to JSON");
+  } catch (error) {
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to parse INI: " + error.message);
+    }
+  }
 }

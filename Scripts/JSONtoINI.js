@@ -15,7 +15,7 @@ function main(state) {
     let ini = '';
 
     for (const [section, values] of Object.entries(obj)) {
-      if (typeof values === 'object' && !Array.isArray(values)) {
+      if (values && typeof values === 'object' && !Array.isArray(values)) {
         ini += `[${section}]\n`;
         for (const [key, value] of Object.entries(values)) {
           ini += `${key}=${value}\n`;
@@ -27,8 +27,12 @@ function main(state) {
     }
 
     state.text = ini.trim();
-    state.postInfo("Converted to INI format");
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Converted to INI format");
+    }
   } catch (error) {
-    state.postError(`Invalid JSON: ${error.message}`);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to convert JSON to INI: " + error.message);
+    }
   }
 }
