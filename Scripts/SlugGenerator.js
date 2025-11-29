@@ -1,30 +1,35 @@
 /**
   {
     "api": 1,
-    "name": "Generate URL Slug",
-    "description": "Convert text to URL-friendly slug",
+    "name": "Slug Generator",
+    "description": "Generates URL-friendly slugs from text",
     "author": "Boop",
-    "icon": "link",
-    "tags": "slug,url,seo,format,text"
+    "icon": "link.circle.fill",
+    "tags": "slug,url,seo,permalink,sanitize"
   }
 **/
 
 function main(state) {
-  let slug = state.text
-    .toLowerCase()
+  let slug = String(state.text || '')
     .trim()
-    // Remove accents
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    // Replace spaces and special chars with hyphens
-    .replace(/[^a-z0-9]+/g, '-')
-    // Remove leading/trailing hyphens
-    .replace(/^-+|-+$/g, '')
-    // Replace multiple consecutive hyphens
-    .replace(/-+/g, '-')
-    // Limit length
-    .substring(0, 100);
+    .toLowerCase()
+    .normalize('NFD')                 // decompose accents
+    .replace(/[\u0300-\u036f]/g, '')  // remove diacritics
+    .replace(/[^a-z0-9]+/g, '-')      // non-alnum → hyphen
+    .replace(/^-+|-+$/g, '')          // trim hyphens
+    .replace(/-+/g, '-')              // collapse hyphens
+    .substring(0, 100);               // limit length
+
+  if (!slug) {
+    if (typeof state.postError === 'function') {
+      state.postError("No valid characters for slug");
+    }
+    return;
+  }
 
   state.text = slug;
-  state.postInfo("Generated URL slug");
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo("Generated URL slug");
+  }
 }

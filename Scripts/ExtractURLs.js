@@ -2,23 +2,30 @@
   {
     "api": 1,
     "name": "Extract URLs",
-    "description": "Extract all URLs from text",
+    "description": "Extracts all URLs from text",
     "author": "Boop",
     "icon": "link",
-    "tags": "extract,url,link,parse,text"
+    "tags": "url,extract,links,http,https"
   }
 **/
 
 function main(state) {
-  const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/g;
-  const urls = state.text.match(urlRegex);
+  const urlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+  const matches = state.text.match(urlPattern);
 
-  if (urls && urls.length > 0) {
-    const unique = [...new Set(urls)];
-    state.text = unique.join('\n');
-    state.postInfo(`Found ${unique.length} unique URL(s)`);
-  } else {
-    state.text = "No URLs found";
-    state.postError("No URLs found");
+  if (!matches || matches.length === 0) {
+    if (typeof state.postError === 'function') {
+      state.postError("No URLs found");
+    }
+    return;
+  }
+
+  const cleaned = matches.map(url => url.replace(/[.,;:!?)]+$/, ''));
+  const unique = [...new Set(cleaned)];
+
+  state.text = unique.join('\n');
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo(`Found ${matches.length} URL(s), ${unique.length} unique`);
   }
 }

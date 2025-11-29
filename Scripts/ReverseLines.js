@@ -1,11 +1,11 @@
 /**
   {
     "api": 1,
-    "name": "Reverse Line Order",
-    "description": "Reverse the order of lines",
+    "name": "Reverse Lines",
+    "description": "Reverses the order of lines",
     "author": "Boop",
-    "icon": "reverse",
-    "tags": "reverse,lines,order,text"
+    "icon": "arrow.up.arrow.down",
+    "tags": "reverse,lines,order,flip"
   }
 **/
 
@@ -14,5 +14,8 @@ function main(state) {
   const reversed = lines.reverse();
 
   state.text = reversed.join('\n');
-  state.postInfo("Reversed line order");
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo("Reversed line order");
+  }
 }

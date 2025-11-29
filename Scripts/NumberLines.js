@@ -2,22 +2,25 @@
   {
     "api": 1,
     "name": "Number Lines",
-    "description": "Add line numbers to text",
+    "description": "Adds line numbers to each line",
     "author": "Boop",
-    "icon": "list",
-    "tags": "number,lines,prefix,text"
+    "icon": "list.number",
+    "tags": "number,lines,count,prefix"
   }
 **/
 
 function main(state) {
   const lines = state.text.split('\n');
-  const maxDigits = String(lines.length).length;
+  const padding = String(lines.length).length;
 
-  const numbered = lines.map((line, index) => {
-    const lineNum = String(index + 1).padStart(maxDigits, ' ');
-    return `${lineNum}. ${line}`;
+  const numbered = lines.map((line, i) => {
+    const num = String(i + 1).padStart(padding, ' ');
+    return `${num}: ${line}`;
   });
 
   state.text = numbered.join('\n');
-  state.postInfo("Added line numbers");
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo("Added line numbers");
+  }
 }

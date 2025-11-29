@@ -1,60 +1,66 @@
 /**
   {
     "api": 1,
-    "name": "Levenshtein Distance",
-    "description": "Calculate edit distance between two strings (separate with ---)",
+    "name": "String Similarity",
+    "description": "Calculates Levenshtein distance and similarity (separate strings with ---)",
     "author": "Boop",
-    "icon": "arrow.left.and.right",
-    "tags": "levenshtein,distance,similarity,compare"
+    "icon": "equal.square",
+    "tags": "levenshtein,distance,similarity,compare,fuzzy"
   }
 **/
 
 function main(state) {
   try {
-    const parts = state.text.split('---');
-
+    const parts = state.text.split(/^---$/m);
     if (parts.length !== 2) {
-      state.postError("Format: string1---string2");
+      if (typeof state.postError === 'function') {
+        state.postError("Separate two strings with --- on its own line");
+      }
       return;
     }
 
-    const str1 = parts[0].trim();
-    const str2 = parts[1].trim();
+    const s1 = parts[0].trim();
+    const s2 = parts[1].trim();
 
-    function levenshtein(a, b) {
-      const matrix = [];
+    const m = s1.length;
+    const n = s2.length;
+    const dp = Array(m + 1);
 
-      for (let i = 0; i <= b.length; i++) {
-        matrix[i] = [i];
-      }
-
-      for (let j = 0; j <= a.length; j++) {
-        matrix[0][j] = j;
-      }
-
-      for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-          if (b.charAt(i - 1) === a.charAt(j - 1)) {
-            matrix[i][j] = matrix[i - 1][j - 1];
-          } else {
-            matrix[i][j] = Math.min(
-              matrix[i - 1][j - 1] + 1, // substitution
-              matrix[i][j - 1] + 1,     // insertion
-              matrix[i - 1][j] + 1      // deletion
-            );
-          }
+    for (let i = 0; i <= m; i++) {
+      dp[i] = Array(n + 1);
+      for (let j = 0; j <= n; j++) {
+        if (i === 0) {
+          dp[i][j] = j;
+        } else if (j === 0) {
+          dp[i][j] = i;
+        } else {
+          const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,      // deletion
+            dp[i][j - 1] + 1,      // insertion
+            dp[i - 1][j - 1] + cost // substitution
+          );
         }
       }
-
-      return matrix[b.length][a.length];
     }
 
-    const distance = levenshtein(str1, str2);
-    const maxLen = Math.max(str1.length, str2.length);
-    const similarity = maxLen === 0 ? 100 : ((1 - distance / maxLen) * 100).toFixed(2);
+    const distance = dp[m][n];
+    const maxLen = Math.max(m, n);
+    const similarity = maxLen === 0 ? '100.0' : ((1 - distance / maxLen) * 100).toFixed(1);
 
-    state.text = `Distance: ${distance}\nSimilarity: ${similarity}%`;
+    state.text =
+      'String 1: "' + s1 + '" (' + m + ' chars)\n' +
+      'String 2: "' + s2 + '" (' + n + ' chars)\n\n' +
+      'Levenshtein Distance: ' + distance + '\n' +
+      'Similarity: ' + similarity + '%\n' +
+      'Operations needed: ' + distance + ' edit(s)';
+
+    if (typeof state.postInfo === 'function') {
+      state.postInfo('Distance: ' + distance + ', Similarity: ' + similarity + '%');
+    }
   } catch (error) {
-    state.postError("Failed to calculate Levenshtein distance: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError('Failed to calculate string similarity: ' + error.message);
+    }
   }
 }

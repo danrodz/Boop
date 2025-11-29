@@ -1,44 +1,56 @@
 /**
   {
     "api": 1,
-    "name": "Validate Email Address",
-    "description": "Validate email address format",
+    "name": "Validate Email",
+    "description": "Validates email address format",
     "author": "Boop",
-    "icon": "envelope",
+    "icon": "envelope.fill",
     "tags": "email,validate,check"
   }
 **/
 
 function main(state) {
-  try {
-    const email = state.text.trim();
+  const email = String(state.text || '').trim();
 
-    // RFC 5322 compliant regex (simplified)
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  if (!email) {
+    state.text = "✗ Invalid email\n\nReason: Empty input";
+    if (typeof state.postError === "function") {
+      state.postError("Empty email input");
+    }
+    return;
+  }
 
-    const isValid = emailRegex.test(email);
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
-    let result = isValid ? '✓ Valid email address\n\n' : '✗ Invalid email address\n\n';
+  if (emailRegex.test(email)) {
+    const [localPart, domain] = email.split('@');
+    const domainParts = domain.split('.');
+    const tld = domainParts[domainParts.length - 1];
 
-    // Extract parts
-    if (isValid) {
-      const [local, domain] = email.split('@');
-      const domainParts = domain.split('.');
-      const tld = domainParts[domainParts.length - 1];
+    state.text = `✓ Valid email format
 
-      result += `Local part: ${local}\n`;
-      result += `Domain: ${domain}\n`;
-      result += `TLD: ${tld}`;
-    } else {
-      result += 'Common issues:\n';
-      result += '- Missing @ symbol\n';
-      result += '- Invalid characters\n';
-      result += '- Missing domain\n';
-      result += '- Invalid TLD';
+Local part: ${localPart}
+Domain: ${domain}
+TLD: ${tld}`;
+    if (typeof state.postInfo === "function") {
+      state.postInfo("Valid email format");
+    }
+  } else {
+    let reason = "Invalid format";
+
+    if (!email.includes('@')) {
+      reason = "Missing @ symbol";
+    } else if (email.startsWith('@')) {
+      reason = "Missing local part (before @)";
+    } else if (email.endsWith('@')) {
+      reason = "Missing domain (after @)";
+    } else if (!email.split('@')[1].includes('.')) {
+      reason = "Domain must contain at least one dot";
     }
 
-    state.text = result;
-  } catch (error) {
-    state.postError("Validation failed: " + error.message);
+    state.text = `✗ Invalid email\n\nReason: ${reason}`;
+    if (typeof state.postError === "function") {
+      state.postError("Invalid email format: " + reason);
+    }
   }
 }

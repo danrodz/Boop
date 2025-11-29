@@ -2,57 +2,96 @@
   {
     "api": 1,
     "name": "User Agent Parser",
-    "description": "Parse and analyze HTTP User-Agent string",
+    "description": "Parses and explains User-Agent strings",
     "author": "Boop",
-    "icon": "desktopcomputer",
-    "tags": "useragent,browser,parse,http"
+    "icon": "globe",
+    "tags": "user-agent,parse,browser,detect"
   }
 **/
 
 function main(state) {
   try {
-    const ua = state.text.trim();
+    const ua = String(state.text || '').trim();
+    if (!ua) {
+      if (typeof state.postError === 'function') {
+        state.postError("Empty User-Agent string");
+      }
+      return;
+    }
 
-    let result = 'User Agent Analysis:\n\n';
-
-    // Detect browser
+    // Browser detection
     let browser = 'Unknown';
-    if (ua.includes('Firefox/')) browser = 'Firefox ' + ua.match(/Firefox\/([0-9.]+)/)?.[1];
-    else if (ua.includes('Chrome/')) browser = 'Chrome ' + ua.match(/Chrome\/([0-9.]+)/)?.[1];
-    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari ' + ua.match(/Version\/([0-9.]+)/)?.[1];
-    else if (ua.includes('Edge/')) browser = 'Edge ' + ua.match(/Edge\/([0-9.]+)/)?.[1];
-    else if (ua.includes('MSIE')) browser = 'Internet Explorer ' + ua.match(/MSIE ([0-9.]+)/)?.[1];
+    let version = '';
 
-    result += `Browser: ${browser}\n`;
+    let m;
+    if ((m = ua.match(/Firefox\/([\d.]+)/))) {
+      browser = 'Firefox';
+      version = m[1];
+    } else if ((m = ua.match(/Edg\/([\d.]+)/))) {
+      browser = 'Microsoft Edge';
+      version = m[1];
+    } else if ((m = ua.match(/Edge\/([\d.]+)/))) {
+      browser = 'Microsoft Edge';
+      version = m[1];
+    } else if (ua.includes('Chrome/') && !ua.includes('Edg/') && !ua.includes('OPR/') && !ua.includes('Brave/')) {
+      m = ua.match(/Chrome\/([\d.]+)/);
+      browser = 'Chrome';
+      version = m ? m[1] : '';
+    } else if (ua.includes('Safari/') && !ua.includes('Chrome')) {
+      browser = 'Safari';
+      m = ua.match(/Version\/([\d.]+)/);
+      version = m ? m[1] : '';
+    } else if (ua.includes('MSIE') || ua.includes('Trident/')) {
+      browser = 'Internet Explorer';
+      m = ua.match(/(?:MSIE |rv:)([\d.]+)/);
+      version = m ? m[1] : '';
+    }
 
-    // Detect OS
+    // OS detection
     let os = 'Unknown';
-    if (ua.includes('Windows NT 10.0')) os = 'Windows 10';
+
+    if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
     else if (ua.includes('Windows NT 6.3')) os = 'Windows 8.1';
     else if (ua.includes('Windows NT 6.2')) os = 'Windows 8';
     else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
-    else if (ua.includes('Mac OS X')) os = 'macOS ' + ua.match(/Mac OS X ([0-9_]+)/)?.[1]?.replace(/_/g, '.');
-    else if (ua.includes('Linux')) os = 'Linux';
-    else if (ua.includes('Android')) os = 'Android ' + ua.match(/Android ([0-9.]+)/)?.[1];
-    else if (ua.includes('iPhone')) os = 'iOS ' + ua.match(/OS ([0-9_]+)/)?.[1]?.replace(/_/g, '.');
+    else if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS X')) {
+      const macVersion = ua.match(/Mac OS X ([\d_]+)/);
+      os = macVersion ? `macOS ${macVersion[1].replace(/_/g, '.')}` : 'macOS';
+    } else if (ua.includes('Android')) {
+      const androidVersion = ua.match(/Android ([\d.]+)/);
+      os = androidVersion ? `Android ${androidVersion[1]}` : 'Android';
+    } else if (ua.match(/iPhone|iPad|iPod/)) {
+      const iosVersion = ua.match(/OS ([\d_]+)/);
+      os = iosVersion ? `iOS ${iosVersion[1].replace(/_/g, '.')}` : 'iOS';
+    } else if (ua.includes('Linux')) {
+      os = 'Linux';
+    }
 
-    result += `Operating System: ${os}\n`;
-
-    // Detect device type
+    // Device type
     let device = 'Desktop';
-    if (ua.includes('Mobile') || ua.includes('Android')) device = 'Mobile';
-    else if (ua.includes('Tablet') || ua.includes('iPad')) device = 'Tablet';
-
-    result += `Device Type: ${device}\n`;
+    if (/Mobile|Android/i.test(ua)) device = 'Mobile';
+    else if (/Tablet|iPad/i.test(ua)) device = 'Tablet';
 
     // Bot detection
-    const bots = ['bot', 'crawler', 'spider', 'scraper', 'googlebot', 'bingbot'];
-    const isBot = bots.some(bot => ua.toLowerCase().includes(bot));
+    const isBot = /(bot|crawler|spider|scraper|crawling|googlebot|bingbot)/i.test(ua);
 
-    result += `Is Bot: ${isBot ? 'Yes' : 'No'}`;
+    const result =
+      'USER AGENT PARSER\n\n' +
+      `Browser: ${browser}${version ? ' ' + version : ''}\n` +
+      `OS: ${os}\n` +
+      `Device: ${device}\n` +
+      `Type: ${isBot ? 'Bot/Crawler' : 'Browser'}\n\n` +
+      'Full UA:\n' +
+      ua;
 
     state.text = result;
+    if (typeof state.postInfo === 'function') {
+      state.postInfo("Parsed User-Agent");
+    }
   } catch (error) {
-    state.postError("Failed to parse user agent: " + error.message);
+    if (typeof state.postError === 'function') {
+      state.postError("Failed to parse User-Agent: " + error.message);
+    }
   }
 }

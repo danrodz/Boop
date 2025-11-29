@@ -2,26 +2,27 @@
   {
     "api": 1,
     "name": "Remove Zero-Width Characters",
-    "description": "Remove invisible zero-width characters",
+    "description": "Removes invisible zero-width characters",
     "author": "Boop",
     "icon": "eye.slash",
-    "tags": "zerowidth,invisible,remove,clean"
+    "tags": "zero,width,invisible,hidden,unicode,clean"
   }
 **/
 
 function main(state) {
   try {
-    // Remove all zero-width characters
-    let text = state.text;
+    const zeroWidth = /[\u200B\u200C\u200D\uFEFF\u00AD\u2060\u180E]/g;
+    const matches = state.text.match(zeroWidth);
+    const count = matches ? matches.length : 0;
 
-    text = text.replace(/\u200B/g, ''); // Zero-width space
-    text = text.replace(/\u200C/g, ''); // Zero-width non-joiner
-    text = text.replace(/\u200D/g, ''); // Zero-width joiner
-    text = text.replace(/\uFEFF/g, ''); // Zero-width no-break space (BOM)
-    text = text.replace(/\u180E/g, ''); // Mongolian vowel separator
+    state.text = state.text.replace(zeroWidth, "");
 
-    state.text = text;
+    if (typeof state.postInfo === "function") {
+      state.postInfo("Removed " + count + " zero-width character(s)");
+    }
   } catch (error) {
-    state.postError("Failed to remove zero-width characters: " + error.message);
+    if (typeof state.postError === "function") {
+      state.postError("Failed to remove zero-width characters: " + error.message);
+    }
   }
 }
