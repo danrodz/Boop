@@ -10,21 +10,22 @@
 **/
 
 function main(state) {
-  // Match URLs with various protocols
   const urlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
   const matches = state.text.match(urlPattern);
 
   if (!matches || matches.length === 0) {
-    state.postError("No URLs found");
+    if (typeof state.postError === 'function') {
+      state.postError("No URLs found");
+    }
     return;
   }
 
-  // Clean trailing punctuation that's likely not part of URL
-  const cleaned = matches.map(url => {
-    return url.replace(/[.,;:!?)]+$/, '');
-  });
-
+  const cleaned = matches.map(url => url.replace(/[.,;:!?)]+$/, ''));
   const unique = [...new Set(cleaned)];
 
-  state.text = unique.join('\n') + `\n\n---\nFound: ${matches.length} URLs\nUnique: ${unique.length}`;
+  state.text = unique.join('\n');
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo(`Found ${matches.length} URL(s), ${unique.length} unique`);
+  }
 }

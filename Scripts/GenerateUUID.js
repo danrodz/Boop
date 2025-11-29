@@ -17,14 +17,17 @@ function main(state) {
       return v.toString(16);
     });
   }
-  
-  const count = parseInt(state.text.trim()) || 1;
+
+  const raw = (state.text || '').trim();
+  const count = Math.max(1, Math.min(parseInt(raw, 10) || 1, 100));
   const uuids = [];
-  
-  for (let i = 0; i < Math.min(count, 100); i++) {
+
+  for (let i = 0; i < count; i++) {
     uuids.push(generateUUID());
   }
-  
+
   state.text = uuids.join('\n');
-  state.postInfo(`Generated ${uuids.length} UUID(s)`);
+  if (typeof state.postInfo === 'function') {
+    state.postInfo(`Generated ${uuids.length} UUID(s)`);
+  }
 }

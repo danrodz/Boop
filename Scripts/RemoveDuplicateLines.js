@@ -13,15 +13,18 @@ function main(state) {
   const lines = state.text.split('\n');
   const seen = new Set();
   const unique = [];
-  
+
   for (const line of lines) {
     if (!seen.has(line)) {
       seen.add(line);
       unique.push(line);
     }
   }
-  
+
   const removed = lines.length - unique.length;
   state.text = unique.join('\n');
-  state.postInfo(`Removed ${removed} duplicate line(s)`);
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo(`Removed ${removed} duplicate line(s)`);
+  }
 }

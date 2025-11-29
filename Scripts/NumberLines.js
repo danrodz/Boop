@@ -19,4 +19,8 @@ function main(state) {
   });
 
   state.text = numbered.join('\n');
+
+  if (typeof state.postInfo === 'function') {
+    state.postInfo("Added line numbers");
+  }
 }

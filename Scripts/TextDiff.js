@@ -10,49 +10,80 @@
 **/
 
 function main(state) {
-  var parts = state.text.split(/^---$/m);
-  if (parts.length !== 2) {
-    state.postError("Separate two texts with --- on its own line");
-    return;
-  }
-  
-  var lines1 = parts[0].trim().split("\n");
-  var lines2 = parts[1].trim().split("\n");
-  
-  // Longest Common Subsequence for diff
-  function lcs(a, b) {
-    var m = a.length, n = b.length;
-    var dp = [];
-    for (var i = 0; i <= m; i++) {
-      dp[i] = [];
-      for (var j = 0; j <= n; j++) {
-        if (i === 0 || j === 0) dp[i][j] = 0;
-        else if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
-        else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+  try {
+    const parts = state.text.split(/^---$/m);
+    if (parts.length !== 2) {
+      if (typeof state.postError === 'function') {
+        state.postError("Separate two texts with --- on its own line");
       }
+      return;
     }
-    return dp;
+
+    const lines1 = parts[0].trim().split('\n');
+    const lines2 = parts[1].trim().split('\n');
+
+    function buildLcsTable(a, b) {
+      const m = a.length;
+      const n = b.length;
+      const dp = Array(m + 1);
+      for (let i = 0; i <= m; i++) {
+        dp[i] = Array(n + 1).fill(0);
+      }
+
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (a[i - 1] === b[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+          }
+        }
+      }
+      return dp;
+    }
+
+    function buildDiff(dp, a, b) {
+      const diff = [];
+      let i = a.length;
+      let j = b.length;
+
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+          diff.push({ type: ' ', line: a[i - 1] });
+          i--;
+          j--;
+        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+          diff.push({ type: '+', line: b[j - 1] });
+          j--;
+        } else if (i > 0 && (j === 0 || dp[i - 1][j] > dp[i][j - 1])) {
+          diff.push({ type: '-', line: a[i - 1] });
+          i--;
+        }
+      }
+
+      return diff.reverse();
+    }
+
+    const dp = buildLcsTable(lines1, lines2);
+    const diff = buildDiff(dp, lines1, lines2);
+
+    let added = 0;
+    let removed = 0;
+
+    const result = diff.map(d => {
+      if (d.type === '+') added++;
+      if (d.type === '-') removed++;
+      return d.type + ' ' + d.line;
+    });
+
+    state.text = result.join('\n');
+
+    if (typeof state.postInfo === 'function') {
+      state.postInfo('+' + added + ' additions, -' + removed + ' deletions');
+    }
+  } catch (error) {
+    if (typeof state.postError === 'function') {
+      state.postError('Failed to generate diff: ' + error.message);
+    }
   }
-  
-  function backtrack(dp, a, b, i, j) {
-    if (i === 0 && j === 0) return [];
-    if (i === 0) return backtrack(dp, a, b, i, j-1).concat([{type: "+", line: b[j-1]}]);
-    if (j === 0) return backtrack(dp, a, b, i-1, j).concat([{type: "-", line: a[i-1]}]);
-    if (a[i-1] === b[j-1]) return backtrack(dp, a, b, i-1, j-1).concat([{type: " ", line: a[i-1]}]);
-    if (dp[i-1][j] > dp[i][j-1]) return backtrack(dp, a, b, i-1, j).concat([{type: "-", line: a[i-1]}]);
-    return backtrack(dp, a, b, i, j-1).concat([{type: "+", line: b[j-1]}]);
-  }
-  
-  var dp = lcs(lines1, lines2);
-  var diff = backtrack(dp, lines1, lines2, lines1.length, lines2.length);
-  
-  var added = 0, removed = 0;
-  var result = diff.map(function(d) {
-    if (d.type === "+") added++;
-    if (d.type === "-") removed++;
-    return d.type + " " + d.line;
-  });
-  
-  state.text = result.join("\n");
-  state.postInfo("+" + added + " additions, -" + removed + " deletions");
 }
